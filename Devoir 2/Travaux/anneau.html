@@ -1,0 +1,143 @@
+
+<!-- saved from url=(0174)http://www.uqac.ca/daudet/Cours/Infographie/DOCUMENTS/repertoire435/DOCUMENTS-MULTIMEDIA-COMPLETS/Interactive-Computer-Graphics-7ed/SOURCES/Source%20Code/angelChap4/cube.html -->
+<html class="gr__uqac_ca"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+	
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute  vec4 vPosition;
+attribute  vec4 vColor;
+varying vec4 fColor;
+
+uniform vec3 theta;
+
+void main() 
+{
+    // Compute the sines and cosines of theta for each of
+    //   the three axes in one computation.
+    vec3 angles = radians( theta );
+    vec3 c = cos( angles );
+    vec3 s = sin( angles );
+    vec4 tmp_position;
+
+    // Remember: these matrices are column-major
+    //            (columns are stored one after another)
+
+    mat4 rx = mat4( 1.0,  0.0,  0.0, 0.0,    //column 1
+		         0.0,  c.x,  s.x, 0.0,    //column 2
+		         0.0, -s.x,  c.x, 0.0,    //column 3
+		         0.0,  0.0,  0.0, 1.0 );  //column 4
+
+    mat4 ry = mat4( c.y, 0.0, -s.y, 0.0,    //column 1
+		         0.0, 1.0,  0.0, 0.0,    //column 2
+		         s.y, 0.0,  c.y, 0.0,    //column 3
+		         0.0, 0.0,  0.0, 1.0 );  //column 4
+
+    mat4 rz = mat4( c.z,  s.z, 0.0, 0.0,   //column 1
+		        -s.z,  c.z, 0.0, 0.0,   //column 2
+		         0.0,  0.0, 1.0, 0.0,   //column 3
+		         0.0,  0.0, 0.0, 1.0 ); //column 4
+
+    tmp_position =  rz * ry * rx * vPosition;
+
+    // Now we need to invert the Z coordinates since Web 
+    // browsers map the clip coordinates to the NDC (normalized 
+    // device coordinates) expecting the Z axis to be inverted 
+    // (as do perspective projection matrices).
+
+    tmp_position.z = -tmp_position.z;
+
+    fColor = vColor;
+    gl_Position = tmp_position;
+} 
+</script>
+
+<script id="vertex-shader2" type="x-shader/x-vertex">
+	attribute vec4 vPosition;
+	attribute vec4 vColor;
+	uniform vec3 theta;
+	uniform vec4 vScale;
+	uniform vec4 vDisplacement;
+	varying vec4 fColor;
+	void main()
+	{
+		// Compute the sines and cosines of theta for each of
+		// the three axes in one computation.
+		vec3 angles = radians( theta );
+		vec3 c = cos( angles );
+		vec3 s = sin( angles );
+		vec4 newPosition, rotated_position;
+
+		// Appliquer vos modifications sur la variable vPosition
+		newPosition.x = vScale.x * vPosition.x + vDisplacement.x;
+		newPosition.y= vScale.y * vPosition.y + vDisplacement.y;
+		newPosition.z= vScale.z * vPosition.z + vDisplacement.z;
+		newPosition.w= vPosition.w;
+
+		// Remember: these matrices are column-major
+		// (columns are stored one after another)
+		mat4 rx = mat4( 1.0, 0.0, 0.0, 0.0, //column 1
+						0.0, c.x, s.x, 0.0, //column 2
+						0.0, -s.x, c.x, 0.0, //column 3
+						0.0, 0.0, 0.0, 1.0 ); //column 4
+		mat4 ry = mat4( c.y, 0.0, -s.y, 0.0, //column 1
+						0.0, 1.0, 0.0, 0.0, //column 2
+						s.y, 0.0, c.y, 0.0, //column 3
+						0.0, 0.0, 0.0, 1.0 ); //column 4
+		mat4 rz = mat4( c.z, s.z, 0.0, 0.0, //column 1
+						-s.z, c.z, 0.0, 0.0, //column 2
+						0.0, 0.0, 1.0, 0.0, //column 3
+						0.0, 0.0, 0.0, 1.0 ); //column 4
+		rotated_position = rz * ry * rx * newPosition;
+		// Now we need to invert the Z coordinates since Web
+		// browsers map the clip coordinates to the NDC (normalized
+		// device coordinates) expecting the Z axis to be inverted
+		// (as do perspective projection matrices).
+		rotated_position.z = -rotated_position.z;
+		fColor = vColor;
+		gl_Position = rotated_position;
+	}
+	</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+   
+varying vec4 fColor;
+
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="module">
+	import {draw} from "./__target__/anneau.js"
+	window.onload = draw()
+</script>
+
+</head><body data-gr-c-s-loaded="true">
+<canvas id="gl-canvas" width="512" "="" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+   
+<br>
+
+<button id="xButton">Rotate X</button>
+<button id="yButton">Rotate Y</button>
+<button id="zButton">Rotate Z</button>
+<button id="ShadedButton">Shaded color</button>
+<button id="SolidButton">Solid color</button>
+<input type="range" min=".01" max="1" value=".3" step="0.1" class="slider" id="SizeSlider">SizeSlider
+<input type="range" min="-1" max="1" value="0" step="0.1" class="slider" id="xSlider">xSlider
+<input type="range" min="-1" max="1" value="0" step="0.1" class="slider" id="ySlider">ySlider
+<input type="range" min="-1" max="1" value="0" step="0.1" class="slider" id="zSlider">zSlider
+
+
+
+
+
+</body></html>
