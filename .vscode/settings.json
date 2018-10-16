@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "*.py": "python",
+   //     "*.py": "javascript",
+    },
+
+    "javascript.validate.enable": true
+
+}
