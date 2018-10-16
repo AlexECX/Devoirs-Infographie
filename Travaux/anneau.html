@@ -88,6 +88,7 @@ void main()
 						0.0, 0.0, 1.0, 0.0, //column 3
 						0.0, 0.0, 0.0, 1.0 ); //column 4
 		rotated_position = rz * ry * rx * newPosition;
+		
 		// Now we need to invert the Z coordinates since Web
 		// browsers map the clip coordinates to the NDC (normalized
 		// device coordinates) expecting the Z axis to be inverted

@@ -189,6 +189,9 @@ function quad(a, b, c, d)
 __pragma__('js', '{}', """
 //Render function using WebGL""")
 
+def matrice_t():
+    pass 
+
 def render_event():
     global ori_scale, ori_disp, anglex, angley
     clear_canvas(gl)
