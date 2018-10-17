@@ -12,28 +12,17 @@
 	varying vec4 fColor;
 	void main()
 	{
-		// Compute the sines and cosines of theta for each of
-		// the three axes in one computation.
-		vec3 angles = radians( theta );
-		vec3 c = cos( angles );
-		vec3 s = sin( angles );
-		vec4 newPosition, rotated_position;
-
-
-		// Appliquer vos modifications sur la variable vPosition
-
-		//newPosition = vScale * vPosition + vDisplacement;
-
+		vec4 new_position;
 		
-		rotated_position = modelView * vPosition + vDisplacement;
+		new_position = modelView * vPosition;
 
 		// Now we need to invert the Z coordinates since Web
 		// browsers map the clip coordinates to the NDC (normalized
 		// device coordinates) expecting the Z axis to be inverted
 		// (as do perspective projection matrices).
-		rotated_position.z = -rotated_position.z;
+		new_position.z = -new_position.z;
 		fColor = vColor;
-		gl_Position = rotated_position;
+		gl_Position = new_position;
 	}
 	</script>
 

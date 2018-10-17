@@ -26,8 +26,8 @@ shadedcolors = []
 
 theta = [0, 0, 0]
 
-ori_scale = Vector4D(.3,.3,.3,1)
-ori_disp = Vector4D(0,0,0,0)
+ori_scale = Vector4D(.3, .3, .3, 1)
+ori_disp = Vector4D(0, 0, 0, 0)
 
 
 BaseColors = [
@@ -102,7 +102,7 @@ def draw():
     global NumVertices, theta
     global canvas, display
 
-    canvas = document.getElementById( "gl-canvas" )
+    canvas = document.getElementById("gl-canvas")
     canvas.addEventListener("mousedown", doMouseDown, False)
     display = document.getElementById("display")
 
@@ -122,13 +122,8 @@ def draw():
 
     shadedcolorsBuffer = gl.createBuffer()
 
-    # thetaLoc = gl.getUniformLocation(program, "theta")
-
-    __pragma__('js', """\n//event listeners for buttons""")
-
-    __pragma__('js', """\n//Where the scaling and translating is done, followed by render""")
-    
     render_event()
+
 
 __pragma__('js', '{}', """
 function colorCube()
@@ -186,52 +181,55 @@ function quad(a, b, c, d)
 """)
 
 
-__pragma__('js', '{}', """
-//Render function using WebGL""")
+__pragma__('js', """\n//rx, ry, rz, rotation matrix """)
 
-def matrice_t():
 
-    angles = [radians(theta[0]), radians(theta[1]), radians(theta[2])] 
+def matrice_rxz():
+
+    angles = [radians(theta[0]), radians(theta[1]), radians(theta[2])]
     c = vec3(Math.cos(angles[0]), Math.cos(angles[1]), Math.cos(angles[2]))
     s = vec3(Math.sin(angles[0]), Math.sin(angles[1]), Math.sin(angles[2]))
 
-    rx = mat4( 1.0,  0.0,  0.0, 0.0,    
-                0.0,  c[0],  -s[0], 0.0,    
-                0.0, s[0],  c[0], 0.0,    
-                0.0,  0.0,  0.0, 1.0 )
+    rx = mat4(1.0,  0.0,  0.0, 0.0,
+              0.0,  c[0],  -s[0], 0.0,
+              0.0, s[0],  c[0], 0.0,
+              0.0,  0.0,  0.0, 1.0)
 
-    ry = mat4( c[1], 0.0, s[1], 0.0,    
-		         0.0, 1.0,  0.0, 0.0,    
-		         -s[1], 0.0,  c[1], 0.0,    
-		         0.0, 0.0,  0.0, 1.0 )
+    ry = mat4(c[1], 0.0, s[1], 0.0,
+              0.0, 1.0,  0.0, 0.0,
+              -s[1], 0.0,  c[1], 0.0,
+              0.0, 0.0,  0.0, 1.0)
 
-    rz = mat4( c[2],  -s[2], 0.0, 0.0,   
-		        s[2],  c[2], 0.0, 0.0,   
-		         0.0,  0.0, 1.0, 0.0,   
-		         0.0,  0.0, 0.0, 1.0 )
+    rz = mat4(c[2],  -s[2], 0.0, 0.0,
+              s[2],  c[2], 0.0, 0.0,
+              0.0,  0.0, 1.0, 0.0,
+              0.0,  0.0, 0.0, 1.0)
 
     mat_result = mult(rx, ry)
     mat_result = mult(mat_result, rz)
 
     return mat_result
 
+__pragma__('js', """\n//Where the rotation/translating/scaling is done, followed by render""")
 def render_event():
     global ori_scale, ori_disp, anglex, angley
     clear_canvas(gl)
     theta[0] = anglex/10.0
     theta[1] = angley/10.0
-    
-    vDisplacementLoc = gl.getUniformLocation(program, "vDisplacement")
-    vScaleLoc = gl.getUniformLocation(program, "vScale")
+
     thetaLoc = gl.getUniformLocation(program, "theta")
+    gl.uniform3fv(thetaLoc, theta)
     modelViewLoc = gl.getUniformLocation(program, "modelView")
 
-
-    gl.uniformMatrix4fv( modelViewLoc, False, flatten(matrice_t()) )
-
-    gl.uniform3fv(thetaLoc, theta)
-
     __pragma__('js', """\n//The boxes """)
+    __pragma__('js', """/*
+boxs_dist = [
+    ori_disp,
+    ori_disp + Vector4D(0, ori_scale[1]*2, 0, 0),
+    ori_disp + Vector4D(ori_scale[0]*2, 0, 0, 0),
+    ori_disp + Vector4D(ori_scale[0]*2, ori_scale[1]*2, 0, 0),
+]
+*/ """)
     __pragma__("opov")
     boxs_dist = [
         ori_disp,
@@ -242,15 +240,26 @@ def render_event():
     __pragma__("noopov")
 
     for dist in boxs_dist:
-        modelView = matrice_t()
+        modelView = mult(matrice_rxz(), translate(*dist.as_list()))
         modelView = mult(modelView, scale(*ori_scale.as_list()))
-        gl.uniform4fv(vDisplacementLoc, flatten(dist.as_list()))
         gl.uniformMatrix4fv(modelViewLoc, False, flatten(modelView))
         render(gl, program, gl.TRIANGLES, points)
 
-    stick_x = ori_scale * Vector4D(1/3, 2, 1/3, 1) #__:opov
-    stick_y = ori_scale * Vector4D(2, 1/3, 1/3, 1) #__:opov
-
+    __pragma__('js', """\n//The sticks """)
+    __pragma__('js', """/*
+stick_x = ori_scale * Vector4D(1/3, 2, 1/3, 1)
+stick_y = ori_scale * Vector4D(2, 1/3, 1/3, 1)
+*/ """)
+    stick_x = ori_scale * Vector4D(1/3, 2, 1/3, 1)  # __:opov
+    stick_y = ori_scale * Vector4D(2, 1/3, 1/3, 1)  # __:opov
+    __pragma__('js', """/*
+sticks_dist = [
+    ori_disp + Vector4D(0, ori_scale[1], 0, 0),
+    ori_disp + Vector4D(ori_scale[0]*2, ori_scale[1], 0, 0),
+    ori_disp + Vector4D(ori_scale[0], 0, 0, 0),
+    ori_disp + Vector4D(ori_scale[0], ori_scale[1]*2, 0, 0),
+]
+*/ """)
     __pragma__("opov")
     sticks_dist = [
         ori_disp + Vector4D(0, ori_scale[1], 0, 0),
@@ -260,19 +269,17 @@ def render_event():
     ]
     __pragma__("noopov")
 
-    __pragma__('js', """\n//The horizontal sticks """)
+    __pragma__('js', """\n//Render horizontal sticks """)
     for dist in sticks_dist[0:2]:
-        modelView = matrice_t()
+        modelView = mult(matrice_rxz(), translate(*dist.as_list()))
         modelView = mult(modelView, scale(*stick_x.as_list()))
-        gl.uniform4fv(vDisplacementLoc, flatten(dist.as_list()))
         gl.uniformMatrix4fv(modelViewLoc, False, flatten(modelView))
         render(gl, program, gl.TRIANGLES, points)
-    
-    __pragma__('js', """\n//The vertical sticks """)
+
+    __pragma__('js', """\n//Render vertical sticks """)
     for dist in sticks_dist[2:4]:
-        modelView = matrice_t()
+        modelView = mult(matrice_rxz(), translate(*dist.as_list()))
         modelView = mult(modelView, scale(*stick_y.as_list()))
-        gl.uniform4fv(vDisplacementLoc, flatten(dist.as_list()))
         gl.uniformMatrix4fv(modelViewLoc, False, flatten(modelView))
         render(gl, program, gl.TRIANGLES, points)
 
