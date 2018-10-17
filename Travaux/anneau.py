@@ -1,6 +1,6 @@
 from org.transcrypt import __pragma__, __new__  # __: skip
-from MV import vec4, ortho, flatten  # __: skip
-from javascript import Worker, document, alert   # __: skip
+from MV import mat4, vec4, vec3, ortho, flatten, radians, rotate, scale, translate, mult  # __: skip
+from javascript import Worker, document, alert, Math   # __: skip
 from WebGL import initShaders, WebGLUtils, requestAnimFrame  # __: skip
 
 from py_vector import Vector3D, Vector4D
@@ -190,7 +190,30 @@ __pragma__('js', '{}', """
 //Render function using WebGL""")
 
 def matrice_t():
-    pass 
+
+    angles = [radians(theta[0]), radians(theta[1]), radians(theta[2])] 
+    c = vec3(Math.cos(angles[0]), Math.cos(angles[1]), Math.cos(angles[2]))
+    s = vec3(Math.sin(angles[0]), Math.sin(angles[1]), Math.sin(angles[2]))
+
+    rx = mat4( 1.0,  0.0,  0.0, 0.0,    
+                0.0,  c[0],  -s[0], 0.0,    
+                0.0, s[0],  c[0], 0.0,    
+                0.0,  0.0,  0.0, 1.0 )
+
+    ry = mat4( c[1], 0.0, s[1], 0.0,    
+		         0.0, 1.0,  0.0, 0.0,    
+		         -s[1], 0.0,  c[1], 0.0,    
+		         0.0, 0.0,  0.0, 1.0 )
+
+    rz = mat4( c[2],  -s[2], 0.0, 0.0,   
+		        s[2],  c[2], 0.0, 0.0,   
+		         0.0,  0.0, 1.0, 0.0,   
+		         0.0,  0.0, 0.0, 1.0 )
+
+    mat_result = mult(rx, ry)
+    mat_result = mult(mat_result, rz)
+
+    return mat_result
 
 def render_event():
     global ori_scale, ori_disp, anglex, angley
@@ -198,10 +221,13 @@ def render_event():
     theta[0] = anglex/10.0
     theta[1] = angley/10.0
     
-    # vPositionLoc = gl.getAttribLocation(program, "vPosition")
     vDisplacementLoc = gl.getUniformLocation(program, "vDisplacement")
     vScaleLoc = gl.getUniformLocation(program, "vScale")
     thetaLoc = gl.getUniformLocation(program, "theta")
+    modelViewLoc = gl.getUniformLocation(program, "modelView")
+
+
+    gl.uniformMatrix4fv( modelViewLoc, False, flatten(matrice_t()) )
 
     gl.uniform3fv(thetaLoc, theta)
 
@@ -216,8 +242,10 @@ def render_event():
     __pragma__("noopov")
 
     for dist in boxs_dist:
+        modelView = matrice_t()
+        modelView = mult(modelView, scale(*ori_scale.as_list()))
         gl.uniform4fv(vDisplacementLoc, flatten(dist.as_list()))
-        gl.uniform4fv(vScaleLoc, flatten(ori_scale.as_list()))
+        gl.uniformMatrix4fv(modelViewLoc, False, flatten(modelView))
         render(gl, program, gl.TRIANGLES, points)
 
     stick_x = ori_scale * Vector4D(1/3, 2, 1/3, 1) #__:opov
@@ -234,14 +262,18 @@ def render_event():
 
     __pragma__('js', """\n//The horizontal sticks """)
     for dist in sticks_dist[0:2]:
+        modelView = matrice_t()
+        modelView = mult(modelView, scale(*stick_x.as_list()))
         gl.uniform4fv(vDisplacementLoc, flatten(dist.as_list()))
-        gl.uniform4fv(vScaleLoc, flatten(stick_x.as_list()))
+        gl.uniformMatrix4fv(modelViewLoc, False, flatten(modelView))
         render(gl, program, gl.TRIANGLES, points)
     
     __pragma__('js', """\n//The vertical sticks """)
     for dist in sticks_dist[2:4]:
+        modelView = matrice_t()
+        modelView = mult(modelView, scale(*stick_y.as_list()))
         gl.uniform4fv(vDisplacementLoc, flatten(dist.as_list()))
-        gl.uniform4fv(vScaleLoc, flatten(stick_y.as_list()))
+        gl.uniformMatrix4fv(modelViewLoc, False, flatten(modelView))
         render(gl, program, gl.TRIANGLES, points)
 
 

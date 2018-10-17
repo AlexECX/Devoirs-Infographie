@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-10-16 17:57:29
+// Transcrypt'ed from Python, 2018-10-16 20:48:54
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Vector3D, Vector4D} from './py_vector.js';
 var __name__ = '__main__';
@@ -16,10 +16,6 @@ export var render_D = 3;
 export var points = list ([]);
 export var solidcolors = list ([]);
 export var shadedcolors = list ([]);
-export var xAxis = 0;
-export var yAxis = 1;
-export var zAxis = 2;
-export var axis = 0;
 export var theta = list ([0, 0, 0]);
 export var ori_scale = Vector4D (0.3, 0.3, 0.3, 1);
 export var ori_disp = Vector4D (0, 0, 0, 0);
@@ -149,6 +145,17 @@ function quad(a, b, c, d)
 
 
 //Render function using WebGL
+export var matrice_t = function () {
+	var angles = list ([radians (theta [0]), radians (theta [1]), radians (theta [2])]);
+	var c = vec3 (Math.cos (angles [0]), Math.cos (angles [1]), Math.cos (angles [2]));
+	var s = vec3 (Math.sin (angles [0]), Math.sin (angles [1]), Math.sin (angles [2]));
+	var rx = mat4 (1.0, 0.0, 0.0, 0.0, 0.0, c [0], -(s [0]), 0.0, 0.0, s [0], c [0], 0.0, 0.0, 0.0, 0.0, 1.0);
+	var ry = mat4 (c [1], 0.0, s [1], 0.0, 0.0, 1.0, 0.0, 0.0, -(s [1]), 0.0, c [1], 0.0, 0.0, 0.0, 0.0, 1.0);
+	var rz = mat4 (c [2], -(s [2]), 0.0, 0.0, s [2], c [2], 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+	var mat_result = mult (rx, ry);
+	var mat_result = mult (mat_result, rz);
+	return mat_result;
+};
 export var render_event = function () {
 	clear_canvas (gl);
 	theta [0] = anglex / 10.0;
@@ -156,13 +163,17 @@ export var render_event = function () {
 	var vDisplacementLoc = gl.getUniformLocation (program, 'vDisplacement');
 	var vScaleLoc = gl.getUniformLocation (program, 'vScale');
 	var thetaLoc = gl.getUniformLocation (program, 'theta');
+	var modelViewLoc = gl.getUniformLocation (program, 'modelView');
+	gl.uniformMatrix4fv (modelViewLoc, false, flatten (matrice_t ()));
 	gl.uniform3fv (thetaLoc, theta);
 	
 	//The boxes 
 	var boxs_dist = list ([ori_disp, __add__ (ori_disp, __call__ (Vector4D, null, 0, __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), 0, 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0))]);
 	for (var dist of boxs_dist) {
+		var modelView = matrice_t ();
+		var modelView = mult (modelView, scale (...ori_scale.as_list ()));
 		gl.uniform4fv (vDisplacementLoc, flatten (dist.as_list ()));
-		gl.uniform4fv (vScaleLoc, flatten (ori_scale.as_list ()));
+		gl.uniformMatrix4fv (modelViewLoc, false, flatten (modelView));
 		render (gl, program, gl.TRIANGLES, points);
 	}
 	var stick_x = __mul__ (ori_scale, __call__ (Vector4D, null, __truediv__ (1, 3), 2, __truediv__ (1, 3), 1));
@@ -171,15 +182,19 @@ export var render_event = function () {
 	
 	//The horizontal sticks 
 	for (var dist of sticks_dist.__getslice__ (0, 2, 1)) {
+		var modelView = matrice_t ();
+		var modelView = mult (modelView, scale (...stick_x.as_list ()));
 		gl.uniform4fv (vDisplacementLoc, flatten (dist.as_list ()));
-		gl.uniform4fv (vScaleLoc, flatten (stick_x.as_list ()));
+		gl.uniformMatrix4fv (modelViewLoc, false, flatten (modelView));
 		render (gl, program, gl.TRIANGLES, points);
 	}
 	
 	//The vertical sticks 
 	for (var dist of sticks_dist.__getslice__ (2, 4, 1)) {
+		var modelView = matrice_t ();
+		var modelView = mult (modelView, scale (...stick_y.as_list ()));
 		gl.uniform4fv (vDisplacementLoc, flatten (dist.as_list ()));
-		gl.uniform4fv (vScaleLoc, flatten (stick_y.as_list ()));
+		gl.uniformMatrix4fv (modelViewLoc, false, flatten (modelView));
 		render (gl, program, gl.TRIANGLES, points);
 	}
 };
