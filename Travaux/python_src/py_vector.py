@@ -1,6 +1,5 @@
 from org.transcrypt import __pragma__ #__: skip
 
-
 # __pragma__('opov')
 
 __pragma__('js',"""
@@ -25,8 +24,6 @@ __pragma__('js', '{}', """
 class Vector:
 
     coord = []
-    normalized = False
-
 
     def __init__(self, *args):
         #args = pack_unpack_compat(args, self)
@@ -38,46 +35,56 @@ class Vector:
     def __repr__(self):
         return "{}{}".format(self.__class__.__name__, self.coord)
 
+    __pragma__('js', '\n//Add list[] functionnalities')
     def __getitem__(self, item):
         """Add list[] functionnalities"""
         return self.coord[item] 
 
+    __pragma__('js', '\n//Add list[key] = value functionnalities')
     def __setitem__(self, key, value):
         """Add list[key] = value functionnalities"""
         self.coord[key] = value
 
+    __pragma__('js', '\n//Add iterability')
     def __iter__(self):
         """Add iterability"""
         for item in self.coord:
             yield item
 
+    __pragma__('js', '\n//Add len() functionnality')
     def __len__(self):
         """Add len() functionnality"""
         return len(self.coord)
 
+    __pragma__('js', '\n//Python abs() method overload')
     def __abs__(self):
-        """Python abs() method overload """
+        """Python abs() method overload"""
         result = [c/c for c in self.coord]
         return self.__class__(*result)
 
+    __pragma__('js', '\n//Negation operator overload')
     def __neg__(self):
         """Negation operator overload"""
         result = [-c for c in self.coord]
         return self.__class__(*result)
 
     # __pragma__('opov')
-
+    __pragma__('js', '\n//Equality == operator overload')
     def __eq__(self, vector):
         """Equality == operator overload"""
+        if len(self) != len(vector):
+            return False
         for i in range(len(self.coord)):
             if self.coord[i] != vector[i]:
                 return False
         return True
 
+    __pragma__('js', '\n//Equality != operator overload')
     def __ne__(self, vector):
         """Equality != operator overload"""
         return False if self.__eq__(vector) else True
 
+    __pragma__('js', '\n//Operator + overload (self + vector case)')
     def __add__(self, vector):
         """Operator + overload (self + vector case)"""
         if isinstance(vector, (int, float, str)):
@@ -88,6 +95,7 @@ class Vector:
                     for i in range(len(self.coord))]
         return self.__class__(*result)
 
+    __pragma__('js', '\n//Operator + overload (vector + self case)')
     def __radd__(self, vector):
         """Operator + overload (vector + self case)"""
         if isinstance(vector, (int, float, str)):
@@ -98,6 +106,7 @@ class Vector:
                     for i in range(len(self.coord))]
         return self.__class__(*result)
 
+    __pragma__('js', '\n//Operator += overload')
     def __iadd__(self, vector):
         """Operator += overload"""
         if isinstance(vector, (int, float, str)):
@@ -108,6 +117,7 @@ class Vector:
                 self.coord[i] += vector[i]
         return self
 
+    __pragma__('js', '\n//Operator - overload (self - vector case)')
     def __sub__(self, vector):
         """Operator - overload (self - vector case)"""
         if isinstance(vector, (int, float, str)):
@@ -118,6 +128,7 @@ class Vector:
                     for i in range(len(self.coord))]
         return self.__class__(*result)
 
+    __pragma__('js', '\n//Operator - overload (vector - self case)')
     def __rsub__(self, vector):
         """Operator - overload (vector - self case)"""
         if isinstance(vector, (int, float, str)):
@@ -128,6 +139,7 @@ class Vector:
                     for i in range(len(self.coord))]
         return self.__class__(*result)
 
+    __pragma__('js', '\n//Operator -= overload')
     def __isub__(self, vector):
         """Operator -= overload"""
         if isinstance(vector, (int, float, str)):
@@ -138,6 +150,7 @@ class Vector:
                 self.coord[i] -= vector[i]
         return self
 
+    __pragma__('js', '\n//Operator * overload (self + vector case)')
     def __mul__(self, vector):
         """Operator * overload (self + vector case)"""
         if isinstance(vector, (int, float, str)):
@@ -148,6 +161,7 @@ class Vector:
                     for i in range(len(self.coord))]
         return self.__class__(*result)
 
+    __pragma__('js', '\n//Operator * overload (vector + self case)')
     def __rmul__(self, vector):
         """Operator * overload (vector + self case)"""
         if isinstance(vector, (int, float, str)):
@@ -158,6 +172,7 @@ class Vector:
                     for i in range(len(self.coord))]
         return self.__class__(*result)
 
+    __pragma__('js', '\n//Operator *= overload')
     def __imul__(self, vector):
         """Operator *= overload"""
         if isinstance(vector, (int, float, str)):
@@ -168,6 +183,7 @@ class Vector:
                 self.coord[i] *= vector[i]
         return self
 
+    __pragma__('js', '\n//Operator / overload (self + vector case)')
     def __truediv__(self, vector):
         """Operator / overload (self + vector case)"""
         if isinstance(vector, (int, float, str)):
@@ -178,6 +194,7 @@ class Vector:
                     for i in range(len(self.coord))]
         return self.__class__(*result)
 
+    __pragma__('js', '\n//Operator / overload (vector + self case)')
     def __rtruediv__(self, vector):
         """Operator / overload (vector + self case)"""
         if isinstance(vector, (int, float, str)):
@@ -188,6 +205,7 @@ class Vector:
                     for i in range(len(self.coord))]
         return self.__class__(*result)
 
+    __pragma__('js', '\n//Operator /= overload')
     def __itruediv__(self, vector):
         """Operator /= overload"""
         if isinstance(vector, (int, float, str)):
@@ -200,37 +218,39 @@ class Vector:
 
     # __pragma__('noopov')
 
-    def lenght_vec(self):
-        """Return the vector lenght of the vector."""
+    __pragma__('js', '\n//Return the vector lenght of the vector')
+    def length_vec(self):
+        """Return the vector lenght of the vector"""
         sqrt_components = 0
         for coord in self.coord:
             sqrt_components += coord * coord
         return sqrt_components**(.5)
 
+    __pragma__('js', '\n//Return a normalized Vector')
     def normalize(self):
-        """Normalize the Vector."""
-        if not self.normalized:
-            if self.lenght_vec() != 0.0:
-                for i, coord in enumerate(self.coord):
-                    self.coord[i] = coord / self.lenght_vec()
-                self.normalized = True
-        return self
+        """Return a normalized Vector"""
+        if self.is_normalized:
+            return self.__class__(*self.coord)
+        else:
+            return self / self.length_vec()
 
+    __pragma__('js', '\n//Return vector coordinates as a list')
     def as_list(self):
         """Return vector coordinates as a list"""
         return self.coord[:]
 
+    __pragma__('js', '\n//')
+    @property
+    def is_normalized(self):
+        return self.length_vec() == 1.0
 
-    @classmethod
-    def dot_product(cls, vector1, vector2) -> float:
-        """Find the dot product of 2 vectors."""
+    __pragma__('js', '\n//Find the dot product of 2 vectors')
+    def dot(self, vector) -> float:
+        """Find the dot product of 2 vectors"""
         dot = 0.0
-        vec1 = cls(*vector1) 
-        vec2 = cls(*vector2)
-        vec1.normalize()
-        vec2.normalize()
-        for i in range(len(vec1)):
-            dot += vec1[i] * vec2[i] #__: opov
+        vec = self.__class__(*vector).normalize()
+        for i in range(len(vec)):
+            dot += self[i] * vec[i] #__: opov
 
         return dot
 
@@ -255,11 +275,13 @@ class Vector3D(Vector):
 
     # __pragma__('opov')
 
+    __pragma__('js', """\n/*Find the cross product of 2 vectors and
+    return the resulting vector*/""")
     @classmethod
     def cross_product(cls, vec1, vec2):
         """
         Find the cross product of 2 vectors and return the resulting 
-        vector.
+        vector
         """
         vector1 = cls(*vec1)
         vector2 = cls(*vec2)

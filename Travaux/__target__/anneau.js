@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-10-17 16:01:48
+// Transcrypt'ed from Python, 2018-10-17 21:02:57
 var shapes = {};
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import * as __module_shapes__ from './shapes.js';
@@ -14,22 +14,68 @@ The main module:
 */
 export var gl = null;
 export var program = null;
-//2D or 3D dimension
+export var canvas = null;
+export var display = null;
+//Dimension of render
 export var render_D = 3;
+//vertices
 export var points = list ([]);
 export var solidcolors = list ([]);
 export var shadedcolors = list ([]);
-export var theta = list ([0, 0, 0]);
-export var ori_scale = Vector4D (0.3, 0.3, 0.3, 1);
-export var ori_disp = Vector4D (0, 0, 0, 0);
+//color codes (rgb)
 export var BaseColors = list ([vec4 (0.0, 0.0, 0.0, 1.0), vec4 (1.0, 0.0, 0.0, 1.0), vec4 (1.0, 1.0, 0.0, 1.0), vec4 (0.0, 1.0, 0.0, 1.0), vec4 (0.0, 0.0, 1.0, 1.0), vec4 (1.0, 0.0, 1.0, 1.0), vec4 (0.0, 1.0, 1.0, 1.0), vec4 (1.0, 1.0, 1.0, 1.0)]);
-export var canvas = null;
-export var display = null;
+//angles related
+export var theta = list ([0, 0, 0]);
 export var prevx = null;
 export var prevy = null;
 export var dragging = false;
 export var anglex = 0;
 export var angley = 0;
+//The default scaling and display position
+export var ori_scale = Vector4D (0.3, 0.3, 0.3, 1);
+export var ori_disp = Vector4D (0, 0, 0, 0);
+
+//This is the main 3D function
+export var draw = function () {
+	//init
+	gl = init_webgl_inst ();
+	clear_canvas (gl);
+	program = select_shaders (gl, 'vertex-shader2', 'fragment-shader');
+	canvas = document.getElementById ('gl-canvas');
+	canvas.addEventListener ('mousedown', doMouseDown, false);
+	display = document.getElementById ('display');
+	//make the cube (with colors)
+	colorCube ();
+	//color buffers
+	var solidcolorsBuffer = gl.createBuffer ();
+	var shadedcolorsBuffer = gl.createBuffer ();
+	
+	//event listeners for buttons
+	var ShadedButton = function () {
+		gl.bindBuffer (gl.ARRAY_BUFFER, shadedcolorsBuffer);
+		gl.bufferData (gl.ARRAY_BUFFER, flatten (shadedcolors), gl.STATIC_DRAW);
+		gl.vertexAttribPointer (vColorLoc, 4, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray (vColorLoc);
+		render_event ();
+	};
+	document.getElementById ('ShadedButton').onclick = ShadedButton;
+	var SolidButton = function () {
+		gl.bindBuffer (gl.ARRAY_BUFFER, solidcolorsBuffer);
+		gl.bufferData (gl.ARRAY_BUFFER, flatten (solidcolors), gl.STATIC_DRAW);
+		gl.vertexAttribPointer (vColorLoc, 4, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray (vColorLoc);
+		render_event ();
+	};
+	document.getElementById ('SolidButton').onclick = SolidButton;
+	
+	//Prep for first render, using solid colors
+	gl.bindBuffer (gl.ARRAY_BUFFER, solidcolorsBuffer);
+	gl.bufferData (gl.ARRAY_BUFFER, flatten (solidcolors), gl.STATIC_DRAW);
+	var vColorLoc = gl.getAttribLocation (program, 'vColor');
+	gl.vertexAttribPointer (vColorLoc, 4, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray (vColorLoc);
+	render_event ();
+};
 
 
 function doMouseDown(evt) {
@@ -69,58 +115,6 @@ function doMouseUp(evt) {
 }
 
 
-
-//This is the main 3D function
-export var draw = function () {
-	canvas = document.getElementById ('gl-canvas');
-	canvas.addEventListener ('mousedown', doMouseDown, false);
-	display = document.getElementById ('display');
-	gl = init_webgl_inst ();
-	clear_canvas (gl);
-	program = select_shaders (gl, 'vertex-shader2', 'fragment-shader');
-	colorCube ();
-	var solidcolorsBuffer = gl.createBuffer ();
-	var shadedcolorsBuffer = gl.createBuffer ();
-	gl.bindBuffer (gl.ARRAY_BUFFER, solidcolorsBuffer);
-	gl.bufferData (gl.ARRAY_BUFFER, flatten (solidcolors), gl.STATIC_DRAW);
-	var vColorLoc = gl.getAttribLocation (program, 'vColor');
-	gl.vertexAttribPointer (vColorLoc, 4, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray (vColorLoc);
-	
-	//event listeners for buttons
-	var ShadedButton = function () {
-		gl.bindBuffer (gl.ARRAY_BUFFER, shadedcolorsBuffer);
-		gl.bufferData (gl.ARRAY_BUFFER, flatten (shadedcolors), gl.STATIC_DRAW);
-		gl.vertexAttribPointer (vColorLoc, 4, gl.FLOAT, false, 0, 0);
-		gl.enableVertexAttribArray (vColorLoc);
-		render_event ();
-	};
-	document.getElementById ('ShadedButton').onclick = ShadedButton;
-	var SolidButton = function () {
-		gl.bindBuffer (gl.ARRAY_BUFFER, solidcolorsBuffer);
-		gl.bufferData (gl.ARRAY_BUFFER, flatten (solidcolors), gl.STATIC_DRAW);
-		gl.vertexAttribPointer (vColorLoc, 4, gl.FLOAT, false, 0, 0);
-		gl.enableVertexAttribArray (vColorLoc);
-		render_event ();
-	};
-	document.getElementById ('SolidButton').onclick = SolidButton;
-	render_event ();
-};
-export var colorCube_t = function () {
-	var shape = shapes.make_cube ();
-	for (var [i, face] of enumerate (shape)) {
-		points.append (face [0]);
-		points.append (face [1]);
-		points.append (face [2]);
-		points.append (face [0]);
-		points.append (face [2]);
-		points.append (face [3]);
-		for (var x = 0; x < 6; x++) {
-			solidcolors.append (BaseColors [i]);
-		}
-		points = js_list (points);
-	}
-};
 
 
 function colorCube()
@@ -202,15 +196,15 @@ export var render_event = function () {
 	
 	//The boxes 
 	/*
-	boxs_dist = [
+	boxs_disp = [
 	    ori_disp,
 	    ori_disp + Vector4D(0, ori_scale[1]*2, 0, 0),
 	    ori_disp + Vector4D(ori_scale[0]*2, 0, 0, 0),
 	    ori_disp + Vector4D(ori_scale[0]*2, ori_scale[1]*2, 0, 0),
 	]
 	*/ 
-	var boxs_dist = list ([ori_disp, __add__ (ori_disp, __call__ (Vector4D, null, 0, __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), 0, 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0))]);
-	for (var dist of boxs_dist) {
+	var boxs_disp = list ([ori_disp, __add__ (ori_disp, __call__ (Vector4D, null, 0, __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), 0, 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0))]);
+	for (var dist of boxs_disp) {
 		var modelView = mult (matrice_rxz (), translate (...dist.as_list ()));
 		var modelView = mult (modelView, scale (...ori_scale.as_list ()));
 		gl.uniformMatrix4fv (modelViewLoc, false, flatten (modelView));
@@ -225,17 +219,17 @@ export var render_event = function () {
 	var stick_x = __mul__ (ori_scale, __call__ (Vector4D, null, __truediv__ (1, 3), 2, __truediv__ (1, 3), 1));
 	var stick_y = __mul__ (ori_scale, __call__ (Vector4D, null, 2, __truediv__ (1, 3), __truediv__ (1, 3), 1));
 	/*
-	sticks_dist = [
+	sticks_disp = [
 	    ori_disp + Vector4D(0, ori_scale[1], 0, 0),
 	    ori_disp + Vector4D(ori_scale[0]*2, ori_scale[1], 0, 0),
 	    ori_disp + Vector4D(ori_scale[0], 0, 0, 0),
 	    ori_disp + Vector4D(ori_scale[0], ori_scale[1]*2, 0, 0),
 	]
 	*/ 
-	var sticks_dist = list ([__add__ (ori_disp, __call__ (Vector4D, null, 0, __getitem__ (ori_scale, 1), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), __getitem__ (ori_scale, 1), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __getitem__ (ori_scale, 0), 0, 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __getitem__ (ori_scale, 0), __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0))]);
+	var sticks_disp = list ([__add__ (ori_disp, __call__ (Vector4D, null, 0, __getitem__ (ori_scale, 1), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), __getitem__ (ori_scale, 1), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __getitem__ (ori_scale, 0), 0, 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __getitem__ (ori_scale, 0), __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0))]);
 	
 	//Render horizontal sticks 
-	for (var dist of sticks_dist.__getslice__ (0, 2, 1)) {
+	for (var dist of sticks_disp.__getslice__ (0, 2, 1)) {
 		var modelView = mult (matrice_rxz (), translate (...dist.as_list ()));
 		var modelView = mult (modelView, scale (...stick_x.as_list ()));
 		gl.uniformMatrix4fv (modelViewLoc, false, flatten (modelView));
@@ -243,7 +237,7 @@ export var render_event = function () {
 	}
 	
 	//Render vertical sticks 
-	for (var dist of sticks_dist.__getslice__ (2, 4, 1)) {
+	for (var dist of sticks_disp.__getslice__ (2, 4, 1)) {
 		var modelView = mult (matrice_rxz (), translate (...dist.as_list ()));
 		var modelView = mult (modelView, scale (...stick_y.as_list ()));
 		gl.uniformMatrix4fv (modelViewLoc, false, flatten (modelView));
