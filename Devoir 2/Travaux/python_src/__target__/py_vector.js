@@ -1,7 +1,6 @@
-// Transcrypt'ed from Python, 2018-10-17 16:01:48
-import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+// Transcrypt'ed from Python, 2018-10-17 15:15:55
+import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 var __name__ = 'py_vector';
-export var __pragma__ = print;
 
 //MV.mix implementation using python operator overload
 export var mix = function (u, v, s) {
@@ -37,6 +36,7 @@ export var mix = function (u, v, s) {
 export var Vector =  __class__ ('Vector', [object], {
 	__module__: __name__,
 	coord: list ([]),
+	normalized: false,
 	get __init__ () {return __get__ (this, function (self) {
 		var args = tuple ([].slice.apply (arguments).slice (1));
 		self.coord = (function () {
@@ -329,7 +329,7 @@ export var Vector =  __class__ ('Vector', [object], {
 		}
 		return self;
 	});},
-	get length_vec () {return __get__ (this, function (self) {
+	get lenght_vec () {return __get__ (this, function (self) {
 		var sqrt_components = 0;
 		for (var coord of self.coord) {
 			sqrt_components += coord * coord;
@@ -337,29 +337,31 @@ export var Vector =  __class__ ('Vector', [object], {
 		return Math.pow (sqrt_components, 0.5);
 	});},
 	get normalize () {return __get__ (this, function (self) {
-		if (self.is_normalized) {
-			return self.__class__ (...self.coord);
+		if (!(self.normalized)) {
+			if (self.lenght_vec () != 0.0) {
+				for (var [i, coord] of enumerate (self.coord)) {
+					self.coord [i] = coord / self.lenght_vec ();
+				}
+				self.normalized = true;
+			}
 		}
-		else {
-			return self / self.length_vec ();
-		}
+		return self;
 	});},
 	get as_list () {return __get__ (this, function (self) {
 		return self.coord.__getslice__ (0, null, 1);
 	});},
-	get _get_is_normalized () {return __get__ (this, function (self) {
-		return self.length_vec () == 1.0;
-	});},
-	get dot () {return __get__ (this, function (self, vector) {
+	get dot_product () {return __getcm__ (this, function (cls, vector1, vector2) {
 		var dot = 0.0;
-		var vec = self.__class__ (...vector).normalize ();
-		for (var i = 0; i < len (vec); i++) {
-			var dot = __call__ (__iadd__, null, dot, __mul__ (__getitem__ (self, i), __getitem__ (vec, i)));
+		var vec1 = cls (...vector1);
+		var vec2 = cls (...vector2);
+		vec1.normalize ();
+		vec2.normalize ();
+		for (var i = 0; i < len (vec1); i++) {
+			var dot = __call__ (__iadd__, null, dot, __mul__ (__getitem__ (vec1, i), __getitem__ (vec2, i)));
 		}
 		return dot;
 	});}
 });
-Object.defineProperty (Vector, 'is_normalized', property.call (Vector, Vector._get_is_normalized));;
 export var Vector2D =  __class__ ('Vector2D', [Vector], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self) {

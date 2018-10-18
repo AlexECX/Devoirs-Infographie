@@ -1,6 +1,6 @@
-from org.transcrypt import __pragma__ #__: skip
+#from org.transcrypt import __pragma__ #__: skip
 
-
+__pragma__ = print
 # __pragma__('opov')
 
 __pragma__('js',"""
@@ -25,8 +25,6 @@ __pragma__('js', '{}', """
 class Vector:
 
     coord = []
-    normalized = False
-
 
     def __init__(self, *args):
         #args = pack_unpack_compat(args, self)
@@ -200,7 +198,7 @@ class Vector:
 
     # __pragma__('noopov')
 
-    def lenght_vec(self):
+    def length_vec(self):
         """Return the vector lenght of the vector."""
         sqrt_components = 0
         for coord in self.coord:
@@ -208,29 +206,27 @@ class Vector:
         return sqrt_components**(.5)
 
     def normalize(self):
-        """Normalize the Vector."""
-        if not self.normalized:
-            if self.lenght_vec() != 0.0:
-                for i, coord in enumerate(self.coord):
-                    self.coord[i] = coord / self.lenght_vec()
-                self.normalized = True
-        return self
+        """Return a normalized Vector."""
+        if self.is_normalized:
+            return self.__class__(*self.coord)
+        else:
+            return self / self.length_vec()
 
     def as_list(self):
         """Return vector coordinates as a list"""
         return self.coord[:]
 
+    @property
+    def is_normalized(self):
+        return self.length_vec() == 1.0
 
-    @classmethod
-    def dot_product(cls, vector1, vector2) -> float:
+
+    def dot(self, vector) -> float:
         """Find the dot product of 2 vectors."""
         dot = 0.0
-        vec1 = cls(*vector1) 
-        vec2 = cls(*vector2)
-        vec1.normalize()
-        vec2.normalize()
-        for i in range(len(vec1)):
-            dot += vec1[i] * vec2[i] #__: opov
+        vec = self.__class__(*vector).normalize()
+        for i in range(len(vec)):
+            dot += self[i] * vec[i] #__: opov
 
         return dot
 

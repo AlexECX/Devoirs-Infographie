@@ -4,6 +4,7 @@ from javascript import Worker, document, alert, Math   # __: skip
 from WebGL import initShaders, WebGLUtils, requestAnimFrame  # __: skip
 
 from py_vector import Vector3D, Vector4D
+import shapes
 # import shapes
 
 __pragma__('js', """/*
@@ -113,6 +114,7 @@ def draw():
     colorCube()
 
     solidcolorsBuffer = gl.createBuffer()
+    shadedcolorsBuffer = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, solidcolorsBuffer)
     gl.bufferData(gl.ARRAY_BUFFER, flatten(solidcolors), gl.STATIC_DRAW)
 
@@ -120,12 +122,45 @@ def draw():
     gl.vertexAttribPointer(vColorLoc, 4, gl.FLOAT, False, 0, 0)
     gl.enableVertexAttribArray(vColorLoc)
 
-    shadedcolorsBuffer = gl.createBuffer()
+    __pragma__('js', """\n//event listeners for buttons""")
+    def ShadedButton():
+        gl.bindBuffer(gl.ARRAY_BUFFER, shadedcolorsBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(shadedcolors), gl.STATIC_DRAW)
+        gl.vertexAttribPointer(vColorLoc, 4, gl.FLOAT, False, 0, 0)
+        gl.enableVertexAttribArray(vColorLoc)
+        render_event()
+    document.getElementById("ShadedButton").onclick = ShadedButton
+
+    def SolidButton():
+        gl.bindBuffer(gl.ARRAY_BUFFER, solidcolorsBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(solidcolors), gl.STATIC_DRAW)
+        gl.vertexAttribPointer(vColorLoc, 4, gl.FLOAT, False, 0, 0)
+        gl.enableVertexAttribArray(vColorLoc)
+        render_event()
+    document.getElementById("SolidButton").onclick = SolidButton
+    
 
     render_event()
 
+def colorCube_t():
+    global points, solidcolors
+    shape = shapes.make_cube()
+
+    for i,face in enumerate(shape):
+        points.append(face[0])
+        points.append(face[1])
+        points.append(face[2])
+        points.append(face[0])
+        points.append(face[2])
+        points.append(face[3])
+        for x in range(6):
+            solidcolors.append(BaseColors[i])
+
+        points = js_list(points)
+
 
 __pragma__('js', '{}', """
+
 function colorCube()
 {
     quad( 1, 0, 3, 2 );
@@ -178,6 +213,7 @@ function quad(a, b, c, d)
     }
 
 }
+
 """)
 
 

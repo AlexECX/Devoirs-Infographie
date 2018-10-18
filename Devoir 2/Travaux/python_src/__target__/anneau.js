@@ -1,8 +1,5 @@
-// Transcrypt'ed from Python, 2018-10-17 16:01:48
-var shapes = {};
+// Transcrypt'ed from Python, 2018-10-17 15:15:54
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
-import * as __module_shapes__ from './shapes.js';
-__nest__ (shapes, '', __module_shapes__);
 import {Vector3D, Vector4D} from './py_vector.js';
 var __name__ = '__main__';
 /*
@@ -19,73 +16,63 @@ export var render_D = 3;
 export var points = list ([]);
 export var solidcolors = list ([]);
 export var shadedcolors = list ([]);
+export var xAxis = 0;
+export var yAxis = 1;
+export var zAxis = 2;
+export var axis = 0;
 export var theta = list ([0, 0, 0]);
 export var ori_scale = Vector4D (0.3, 0.3, 0.3, 1);
 export var ori_disp = Vector4D (0, 0, 0, 0);
 export var BaseColors = list ([vec4 (0.0, 0.0, 0.0, 1.0), vec4 (1.0, 0.0, 0.0, 1.0), vec4 (1.0, 1.0, 0.0, 1.0), vec4 (0.0, 1.0, 0.0, 1.0), vec4 (0.0, 0.0, 1.0, 1.0), vec4 (1.0, 0.0, 1.0, 1.0), vec4 (0.0, 1.0, 1.0, 1.0), vec4 (1.0, 1.0, 1.0, 1.0)]);
-export var canvas = null;
-export var display = null;
-export var prevx = null;
-export var prevy = null;
-export var dragging = false;
-export var anglex = 0;
-export var angley = 0;
-
-
-function doMouseDown(evt) {
-    if (dragging)
-        return;
-    dragging = true;
-    document.addEventListener("mousemove", doMouseDrag, false);
-    document.addEventListener("mouseup", doMouseUp, false);
-    var box = canvas.getBoundingClientRect();
-    prevx = evt.clientX - box.left;
-    prevy = canvas.height + (evt.clientY - box.top);
-}
-function doMouseDrag(evt) {
-    if (!dragging)
-        return;
-    var box = canvas.getBoundingClientRect();
-    var x = evt.clientX - box.left;
-    var y = canvas.height + (evt.clientY - box.top);
-
-    anglex += y - prevy;
-    angley += x - prevx;
-
-    display.innerHTML = "<div> anglex = " + anglex + " ***** angley = " + angley +" </div>";
-
-    prevx = x;
-    prevy = y;
-    
-    render_event();
-    
-}
-function doMouseUp(evt) {
-    if (dragging) {
-        document.removeEventListener("mousemove", doMouseDrag, false);
-        document.removeEventListener("mouseup", doMouseUp, false);
-        dragging = false;
-    }
-}
-
-
 
 //This is the main 3D function
 export var draw = function () {
-	canvas = document.getElementById ('gl-canvas');
-	canvas.addEventListener ('mousedown', doMouseDown, false);
-	display = document.getElementById ('display');
 	gl = init_webgl_inst ();
 	clear_canvas (gl);
 	program = select_shaders (gl, 'vertex-shader2', 'fragment-shader');
 	colorCube ();
 	var solidcolorsBuffer = gl.createBuffer ();
-	var shadedcolorsBuffer = gl.createBuffer ();
 	gl.bindBuffer (gl.ARRAY_BUFFER, solidcolorsBuffer);
 	gl.bufferData (gl.ARRAY_BUFFER, flatten (solidcolors), gl.STATIC_DRAW);
 	var vColorLoc = gl.getAttribLocation (program, 'vColor');
 	gl.vertexAttribPointer (vColorLoc, 4, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray (vColorLoc);
+	var shadedcolorsBuffer = gl.createBuffer ();
+	var thetaLoc = gl.getUniformLocation (program, 'theta');
+	
+	//event listeners for buttons
+	var xSlider = function () {
+		var s = float (this.value);
+		__setitem__ (ori_disp, 0, s);
+	};
+	document.getElementById ('xSlider').oninput = xSlider;
+	var ySlider = function () {
+		var s = float (this.value);
+		__setitem__ (ori_disp, 1, s);
+	};
+	document.getElementById ('ySlider').oninput = ySlider;
+	var zSlider = function () {
+		var s = float (this.value);
+		__setitem__ (ori_disp, 2, s);
+	};
+	document.getElementById ('zSlider').oninput = zSlider;
+	var SizeSlider = function () {
+		var s = float (this.value);
+		ori_scale = __call__ (Vector4D, null, s, s, s, 1);
+	};
+	document.getElementById ('SizeSlider').oninput = SizeSlider;
+	var xButton = function () {
+		axis = xAxis;
+	};
+	document.getElementById ('xButton').onclick = xButton;
+	var yButton = function () {
+		axis = yAxis;
+	};
+	document.getElementById ('yButton').onclick = yButton;
+	var zButton = function () {
+		axis = zAxis;
+	};
+	document.getElementById ('zButton').onclick = zButton;
 	
 	//event listeners for buttons
 	var ShadedButton = function () {
@@ -93,7 +80,6 @@ export var draw = function () {
 		gl.bufferData (gl.ARRAY_BUFFER, flatten (shadedcolors), gl.STATIC_DRAW);
 		gl.vertexAttribPointer (vColorLoc, 4, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray (vColorLoc);
-		render_event ();
 	};
 	document.getElementById ('ShadedButton').onclick = ShadedButton;
 	var SolidButton = function () {
@@ -101,27 +87,45 @@ export var draw = function () {
 		gl.bufferData (gl.ARRAY_BUFFER, flatten (solidcolors), gl.STATIC_DRAW);
 		gl.vertexAttribPointer (vColorLoc, 4, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray (vColorLoc);
-		render_event ();
 	};
 	document.getElementById ('SolidButton').onclick = SolidButton;
-	render_event ();
-};
-export var colorCube_t = function () {
-	var shape = shapes.make_cube ();
-	for (var [i, face] of enumerate (shape)) {
-		points.append (face [0]);
-		points.append (face [1]);
-		points.append (face [2]);
-		points.append (face [0]);
-		points.append (face [2]);
-		points.append (face [3]);
-		for (var x = 0; x < 6; x++) {
-			solidcolors.append (BaseColors [i]);
+	
+	//Where the scaling and translating is done, followed by render
+	var render_loop = function () {
+		clear_canvas (gl);
+		theta [axis] += 2.0;
+		gl.uniform3fv (thetaLoc, theta);
+		var vDisplacementLoc = gl.getUniformLocation (program, 'vDisplacement');
+		var vScaleLoc = gl.getUniformLocation (program, 'vScale');
+		
+		//The boxes 
+		var boxs_dist = list ([ori_disp, __add__ (ori_disp, __call__ (Vector4D, null, 0, __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), 0, 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0))]);
+		for (var dist of boxs_dist) {
+			gl.uniform4fv (vDisplacementLoc, flatten (dist.as_list ()));
+			gl.uniform4fv (vScaleLoc, flatten (ori_scale.as_list ()));
+			render (gl, program, gl.TRIANGLES, points);
 		}
-		points = js_list (points);
-	}
+		var stick_x = __mul__ (ori_scale, __call__ (Vector4D, null, __truediv__ (1, 3), 2, __truediv__ (1, 3), 1));
+		var stick_y = __mul__ (ori_scale, __call__ (Vector4D, null, 2, __truediv__ (1, 3), __truediv__ (1, 3), 1));
+		var sticks_dist = list ([__add__ (ori_disp, __call__ (Vector4D, null, 0, __getitem__ (ori_scale, 1), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), __getitem__ (ori_scale, 1), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __getitem__ (ori_scale, 0), 0, 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __getitem__ (ori_scale, 0), __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0))]);
+		
+		//The horizontal sticks 
+		for (var dist of sticks_dist.__getslice__ (0, 2, 1)) {
+			gl.uniform4fv (vDisplacementLoc, flatten (dist.as_list ()));
+			gl.uniform4fv (vScaleLoc, flatten (stick_x.as_list ()));
+			render (gl, program, gl.TRIANGLES, points);
+		}
+		
+		//The vertical sticks 
+		for (var dist of sticks_dist.__getslice__ (2, 4, 1)) {
+			gl.uniform4fv (vDisplacementLoc, flatten (dist.as_list ()));
+			gl.uniform4fv (vScaleLoc, flatten (stick_y.as_list ()));
+			render (gl, program, gl.TRIANGLES, points);
+		}
+		requestAnimFrame (render_loop);
+	};
+	render_loop ();
 };
-
 
 function colorCube()
 {
@@ -177,79 +181,12 @@ function quad(a, b, c, d)
 }
 
 
+//JS worker that recursively divide a cube's face in 8 parts, count times.
+//Six workers are used, the last worker calls the render function.
 
-//rx, ry, rz, rotation matrix 
-export var matrice_rxz = function () {
-	var angles = list ([radians (theta [0]), radians (theta [1]), radians (theta [2])]);
-	var c = vec3 (Math.cos (angles [0]), Math.cos (angles [1]), Math.cos (angles [2]));
-	var s = vec3 (Math.sin (angles [0]), Math.sin (angles [1]), Math.sin (angles [2]));
-	var rx = mat4 (1.0, 0.0, 0.0, 0.0, 0.0, c [0], -(s [0]), 0.0, 0.0, s [0], c [0], 0.0, 0.0, 0.0, 0.0, 1.0);
-	var ry = mat4 (c [1], 0.0, s [1], 0.0, 0.0, 1.0, 0.0, 0.0, -(s [1]), 0.0, c [1], 0.0, 0.0, 0.0, 0.0, 1.0);
-	var rz = mat4 (c [2], -(s [2]), 0.0, 0.0, s [2], c [2], 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-	var mat_result = mult (rx, ry);
-	var mat_result = mult (mat_result, rz);
-	return mat_result;
-};
+//Function called by the final worker
 
-//Where the rotation/translating/scaling is done, followed by render
-export var render_event = function () {
-	clear_canvas (gl);
-	theta [0] = anglex / 10.0;
-	theta [1] = angley / 10.0;
-	var thetaLoc = gl.getUniformLocation (program, 'theta');
-	gl.uniform3fv (thetaLoc, theta);
-	var modelViewLoc = gl.getUniformLocation (program, 'modelView');
-	
-	//The boxes 
-	/*
-	boxs_dist = [
-	    ori_disp,
-	    ori_disp + Vector4D(0, ori_scale[1]*2, 0, 0),
-	    ori_disp + Vector4D(ori_scale[0]*2, 0, 0, 0),
-	    ori_disp + Vector4D(ori_scale[0]*2, ori_scale[1]*2, 0, 0),
-	]
-	*/ 
-	var boxs_dist = list ([ori_disp, __add__ (ori_disp, __call__ (Vector4D, null, 0, __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), 0, 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0))]);
-	for (var dist of boxs_dist) {
-		var modelView = mult (matrice_rxz (), translate (...dist.as_list ()));
-		var modelView = mult (modelView, scale (...ori_scale.as_list ()));
-		gl.uniformMatrix4fv (modelViewLoc, false, flatten (modelView));
-		render (gl, program, gl.TRIANGLES, points);
-	}
-	
-	//The sticks 
-	/*
-	stick_x = ori_scale * Vector4D(1/3, 2, 1/3, 1)
-	stick_y = ori_scale * Vector4D(2, 1/3, 1/3, 1)
-	*/ 
-	var stick_x = __mul__ (ori_scale, __call__ (Vector4D, null, __truediv__ (1, 3), 2, __truediv__ (1, 3), 1));
-	var stick_y = __mul__ (ori_scale, __call__ (Vector4D, null, 2, __truediv__ (1, 3), __truediv__ (1, 3), 1));
-	/*
-	sticks_dist = [
-	    ori_disp + Vector4D(0, ori_scale[1], 0, 0),
-	    ori_disp + Vector4D(ori_scale[0]*2, ori_scale[1], 0, 0),
-	    ori_disp + Vector4D(ori_scale[0], 0, 0, 0),
-	    ori_disp + Vector4D(ori_scale[0], ori_scale[1]*2, 0, 0),
-	]
-	*/ 
-	var sticks_dist = list ([__add__ (ori_disp, __call__ (Vector4D, null, 0, __getitem__ (ori_scale, 1), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __mul__ (__getitem__ (ori_scale, 0), 2), __getitem__ (ori_scale, 1), 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __getitem__ (ori_scale, 0), 0, 0, 0)), __add__ (ori_disp, __call__ (Vector4D, null, __getitem__ (ori_scale, 0), __mul__ (__getitem__ (ori_scale, 1), 2), 0, 0))]);
-	
-	//Render horizontal sticks 
-	for (var dist of sticks_dist.__getslice__ (0, 2, 1)) {
-		var modelView = mult (matrice_rxz (), translate (...dist.as_list ()));
-		var modelView = mult (modelView, scale (...stick_x.as_list ()));
-		gl.uniformMatrix4fv (modelViewLoc, false, flatten (modelView));
-		render (gl, program, gl.TRIANGLES, points);
-	}
-	
-	//Render vertical sticks 
-	for (var dist of sticks_dist.__getslice__ (2, 4, 1)) {
-		var modelView = mult (matrice_rxz (), translate (...dist.as_list ()));
-		var modelView = mult (modelView, scale (...stick_y.as_list ()));
-		gl.uniformMatrix4fv (modelViewLoc, false, flatten (modelView));
-		render (gl, program, gl.TRIANGLES, points);
-	}
-};
+//Render function using WebGL
 export var render = function (gl, program, mode, vertices) {
 	var vPositionLoc = gl.getAttribLocation (program, 'vPosition');
 	var bufferId = gl.createBuffer ();

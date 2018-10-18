@@ -118,6 +118,7 @@ def draw():
         axis = zAxis
     document.getElementById("zButton").onclick = zButton
 
+
     def ShadedButton():
         gl.bindBuffer(gl.ARRAY_BUFFER, shadedcolorsBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, flatten(shadedcolors), gl.STATIC_DRAW)
