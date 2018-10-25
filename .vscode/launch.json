@@ -20,10 +20,10 @@
             "webRoot": "${workspaceFolder}/Exemples-travail1/Travaux/"
         },
         {
-            "name": "Launch anneau.html",
+            "name": "Launch main.html",
             "type": "chrome",
             "request": "launch",
-            "url": "http://127.0.0.1:8009/Travaux/anneau.html",
+            "url": "http://127.0.0.1:8009/Travaux/spherecylinder.html",
             "webRoot": "${workspaceFolder}/Travaux/",
             // "runtimeArgs": [
             //     "--enable-experimental-web-platform-features",

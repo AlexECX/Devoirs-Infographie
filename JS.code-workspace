@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "Travaux"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.py": "javascript",
+		},
+	}
+}
