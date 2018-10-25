@@ -244,13 +244,14 @@ class Vector:
     def is_normalized(self):
         return self.length_vec() == 1.0
 
-    __pragma__('js', '\n//Find the dot product of 2 vectors')
+    __pragma__('js', '\n//Find the dot product of 2 vectors (produit scalaire)')
     def dot(self, vector) -> float:
-        """Find the dot product of 2 vectors"""
+        """Find the dot product of 2 vectors (produit scalaire)"""
         dot = 0.0
-        vec = self.__class__(*vector).normalize()
-        for i in range(len(vec)):
-            dot += self[i] * vec[i] #__: opov
+        vec1 = self.normalize()
+        vec2 = self.__class__(*vector).normalize()
+        for i in range(len(vec2)):
+            dot += vec1[i] * vec2[i] #__: opov
 
         return dot
 
@@ -276,16 +277,15 @@ class Vector3D(Vector):
     # __pragma__('opov')
 
     __pragma__('js', """\n/*Find the cross product of 2 vectors and
-    return the resulting vector*/""")
-    @classmethod
-    def cross_product(cls, vec1, vec2):
+    return the resulting vector. (math representation is vector x vector)*/""")
+    def cross(self, vec2):
         """
         Find the cross product of 2 vectors and return the resulting 
-        vector
+        vector. (math representation is vector x vector)
         """
-        vector1 = cls(*vec1)
-        vector2 = cls(*vec2)
-        return cls(
+        vector1 = self
+        vector2 = self.__class__(*vec2)
+        return self.__class__(
             vector1[1] * vector2[2] - vector1[2] * vector2[1],
             vector1[2] * vector2[0] - vector1[0] * vector2[2],
             vector1[0] * vector2[1] - vector1[1] * vector2[0],

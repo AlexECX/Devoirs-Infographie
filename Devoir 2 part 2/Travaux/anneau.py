@@ -5,7 +5,8 @@ from javascript import document, Math   # __: skip
 from webgl_utils import webgl_render, clear_canvas, init_webgl_inst, select_shaders
 from py_vector import Vector3D, Vector4D
 import shapes
-
+import time
+x = time.time()
 __pragma__('js', """/*
 The main module: 
 - Will setup WebGL.
