@@ -8,6 +8,21 @@
             "type": "shell",
             "command": "transcrypt",
             "args": [
+                //"-b",
+                "-n",
+                //"-m",
+                "${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Transcrypt Build python",
+            "type": "shell",
+            "command": "transcrypt",
+            "args": [
                 "-b",
                 "-n",
                 //"-m",

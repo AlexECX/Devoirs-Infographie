@@ -6,6 +6,7 @@ from WebGL import initShaders, WebGLUtils, requestAnimFrame  # __: skip
 __pragma__('js', '//Base render function')
 def webgl_render(gl, program, mode, count):
     gl.drawArrays(mode, 0, count)
+    #gl.drawElements( gl.TRIANGLES, numVertices, gl.UNSIGNED_BYTE, 0 )
 
 __pragma__('js', '{}', """
 //Clears the canva""")
