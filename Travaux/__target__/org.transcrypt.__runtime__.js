@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // Transcrypt'ed from Python, 2018-10-25 22:19:05
+=======
+// Transcrypt'ed from Python, 2018-10-25 15:56:48
+>>>>>>> parent of 14aa77b... unsuccessfull variable displacement
 var __name__ = 'org.transcrypt.__runtime__';
 export var __envir__ = {};
 __envir__.interpreter_name = 'python';
