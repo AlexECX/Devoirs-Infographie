@@ -200,32 +200,6 @@ function render() {
 
     //  now, draw sphere model
     modelview = initialmodelview;
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    sphere.render();
-
-
-    //  now, draw sphere model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(0,20,0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    sphere.render();
-
-    //  now, draw sphere model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(0,40,0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    sphere.render();
-
-    //  now, draw sphere model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(0,60,0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
     normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
     modelview = mult(modelview, scale(0.5, 0.5, 0.5));
     sphere.render();
@@ -253,40 +227,30 @@ function render() {
          //random directions
         var axis = normalize(vec3(0,1,0)); //vec3(Math.random(), Math.random(), Math.random());
         var angle = x; //Math.random() * 360;
-
-        var rotate_mat = rotate(angle, axis);
         
-        var direction = mult(mat4(), rotate_mat);
-
-
-        //  now, draw sphere model
-        modelview = initialmodelview;
-        //modelview = mult(modelview, cumul_trans);
-        //modelview = mult(modelview, rotate_mat);
-        modelview = mult(modelview, translate(0.0,0.0,cy_heigth));
-        normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-        modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-        
-        sphere.render();
-
-
-        cumul_trans = mult(cumul_trans, translate(0.0, trans, 0.0));
-
+        cumul_trans = mult(cumul_trans, translate(trans*axis[0], trans*axis[1], trans*axis[2]));
 
         //  now, draw cylinder model
         modelview = initialmodelview;
-        //modelview = mult(modelview, cumul_trans);
-        modelview = mult(modelview, rotate_mat);
-        modelview = mult(modelview, translate(0.0,0.0,trans));
+        modelview = mult(modelview, cumul_trans);
+        modelview = mult(modelview, rotate(angle, axis));
         normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
         modelview = mult(modelview, scale(scalex, scaley, scalez));
-        //cylinder.render();
+        cylinder.render();
 
-        cumul_trans = mult(cumul_trans, translate(0.0, trans, 0.0));
+        cumul_trans = mult(cumul_trans, translate(trans*axis[0], trans*axis[1], trans*axis[2]));
+
+        //  now, draw sphere model
+        modelview = initialmodelview;
+        modelview = mult(modelview, cumul_trans);
+        normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+        modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+        sphere.render();
 
         
     }
     
+<<<<<<< HEAD
     for (var i = 0; i < 1; i++) {
         //render_loop(80.0+20*i);
 =======
@@ -322,9 +286,11 @@ function render() {
     
 
 >>>>>>> parent of 14aa77b... unsuccessfull variable displacement
+=======
+    for (var i = 0; i < 3; i++)
+        render_loop(80.0+10*i);
+>>>>>>> parent of cd6b252... fail
 	}
-
-}
 
 
 function unflatten(matrix) {

@@ -1,8 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Transcrypt'ed from Python, 2018-10-25 22:19:06
 =======
 // Transcrypt'ed from Python, 2018-10-25 15:56:48
 >>>>>>> parent of 14aa77b... unsuccessfull variable displacement
+=======
+// Transcrypt'ed from Python, 2018-10-25 19:53:40
+>>>>>>> parent of cd6b252... fail
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 var __name__ = 'py_vector';
 
@@ -20,10 +24,7 @@ export var mix = function (u, v, s) {
 		var __iterable0__ = u;
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var i = __getitem__ (__iterable0__, __index0__);
-			(function () {
-				var __accu1__ = __accu0__;
-				return __call__ (__accu1__.append, __accu1__, __sub__ (1, s));
-			}) ();
+			__call__ (__accu0__.append, __accu0__, __sub__ (1, s));
 		}
 		return __accu0__;
 	}) ()), __mul__ (v, (function () {
@@ -31,10 +32,7 @@ export var mix = function (u, v, s) {
 		var __iterable0__ = v;
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var i = __getitem__ (__iterable0__, __index0__);
-			(function () {
-				var __accu1__ = __accu0__;
-				return __call__ (__accu1__.append, __accu1__, s);
-			}) ();
+			__call__ (__accu0__.append, __accu0__, s);
 		}
 		return __accu0__;
 	}) ()));
@@ -125,10 +123,7 @@ export var Vector =  __class__ ('Vector', [object], {
 	//Equality != operator overload
 	,
 	get __ne__ () {return __get__ (this, function (self, vector) {
-		return ((function () {
-			var __accu0__ = self;
-			return __call__ (__accu0__.__eq__, __accu0__, vector);
-		}) () ? false : true);
+		return (__call__ (self.__eq__, self, vector) ? false : true);
 	});}
 	//Operator + overload (self + vector case)
 	,
@@ -137,10 +132,7 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __add__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __add__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
 				}
 				return __accu0__;
 			}) ();
@@ -149,18 +141,12 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __add__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __add__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
 				}
 				return __accu0__;
 			}) ();
 		}
-		return (function () {
-			var __accu0__ = self;
-			return __call__ (__accu0__.__class__, __accu0__, ...result);
-		}) ();
+		return __call__ (self.__class__, self, ...result);
 	});}
 	//Operator + overload (vector + self case)
 	,
@@ -169,10 +155,7 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __add__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __add__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
 				}
 				return __accu0__;
 			}) ();
@@ -181,18 +164,12 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __add__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __add__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
 				}
 				return __accu0__;
 			}) ();
 		}
-		return (function () {
-			var __accu0__ = self;
-			return __call__ (__accu0__.__class__, __accu0__, ...result);
-		}) ();
+		return __call__ (self.__class__, self, ...result);
 	});}
 	//Operator += overload
 	,
@@ -220,10 +197,7 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __sub__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __sub__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
 				}
 				return __accu0__;
 			}) ();
@@ -232,18 +206,12 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __sub__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __sub__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
 				}
 				return __accu0__;
 			}) ();
 		}
-		return (function () {
-			var __accu0__ = self;
-			return __call__ (__accu0__.__class__, __accu0__, ...result);
-		}) ();
+		return __call__ (self.__class__, self, ...result);
 	});}
 	//Operator - overload (vector - self case)
 	,
@@ -252,10 +220,7 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __sub__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __sub__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
 				}
 				return __accu0__;
 			}) ();
@@ -264,18 +229,12 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __sub__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __sub__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
 				}
 				return __accu0__;
 			}) ();
 		}
-		return (function () {
-			var __accu0__ = self;
-			return __call__ (__accu0__.__class__, __accu0__, ...result);
-		}) ();
+		return __call__ (self.__class__, self, ...result);
 	});}
 	//Operator -= overload
 	,
@@ -301,10 +260,7 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __mul__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __mul__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
 				}
 				return __accu0__;
 			}) ();
@@ -313,18 +269,12 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __mul__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __mul__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
 				}
 				return __accu0__;
 			}) ();
 		}
-		return (function () {
-			var __accu0__ = self;
-			return __call__ (__accu0__.__class__, __accu0__, ...result);
-		}) ();
+		return __call__ (self.__class__, self, ...result);
 	});}
 	//Operator * overload (vector + self case)
 	,
@@ -333,10 +283,7 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __mul__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __mul__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
 				}
 				return __accu0__;
 			}) ();
@@ -345,18 +292,12 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __mul__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __mul__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
 				}
 				return __accu0__;
 			}) ();
 		}
-		return (function () {
-			var __accu0__ = self;
-			return __call__ (__accu0__.__class__, __accu0__, ...result);
-		}) ();
+		return __call__ (self.__class__, self, ...result);
 	});}
 	//Operator *= overload
 	,
@@ -382,10 +323,7 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __truediv__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __truediv__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
 				}
 				return __accu0__;
 			}) ();
@@ -394,18 +332,12 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __truediv__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __truediv__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
 				}
 				return __accu0__;
 			}) ();
 		}
-		return (function () {
-			var __accu0__ = self;
-			return __call__ (__accu0__.__class__, __accu0__, ...result);
-		}) ();
+		return __call__ (self.__class__, self, ...result);
 	});}
 	//Operator / overload (vector + self case)
 	,
@@ -414,10 +346,7 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __truediv__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __truediv__ (__getitem__ (self.coord, i), __call__ (float, null, vector)));
 				}
 				return __accu0__;
 			}) ();
@@ -426,18 +355,12 @@ export var Vector =  __class__ ('Vector', [object], {
 			var result = (function () {
 				var __accu0__ = [];
 				for (var i = 0; i < __call__ (len, null, self.coord); i++) {
-					(function () {
-						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, __truediv__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
-					}) ();
+					__call__ (__accu0__.append, __accu0__, __truediv__ (__getitem__ (self.coord, i), __getitem__ (vector, i)));
 				}
 				return __accu0__;
 			}) ();
 		}
-		return (function () {
-			var __accu0__ = self;
-			return __call__ (__accu0__.__class__, __accu0__, ...result);
-		}) ();
+		return __call__ (self.__class__, self, ...result);
 	});}
 	//Operator /= overload
 	,
@@ -524,14 +447,8 @@ export var Vector3D =  __class__ ('Vector3D', [Vector], {
 	,
 	get cross () {return __get__ (this, function (self, vec2) {
 		var vector1 = self;
-		var vector2 = (function () {
-			var __accu0__ = self;
-			return __call__ (__accu0__.__class__, __accu0__, ...vec2);
-		}) ();
-		return (function () {
-			var __accu0__ = self;
-			return __call__ (__accu0__.__class__, __accu0__, __sub__ (__mul__ (__getitem__ (vector1, 1), __getitem__ (vector2, 2)), __mul__ (__getitem__ (vector1, 2), __getitem__ (vector2, 1))), __sub__ (__mul__ (__getitem__ (vector1, 2), __getitem__ (vector2, 0)), __mul__ (__getitem__ (vector1, 0), __getitem__ (vector2, 2))), __sub__ (__mul__ (__getitem__ (vector1, 0), __getitem__ (vector2, 1)), __mul__ (__getitem__ (vector1, 1), __getitem__ (vector2, 0))));
-		}) ();
+		var vector2 = __call__ (self.__class__, self, ...vec2);
+		return __call__ (self.__class__, self, __sub__ (__mul__ (__getitem__ (vector1, 1), __getitem__ (vector2, 2)), __mul__ (__getitem__ (vector1, 2), __getitem__ (vector2, 1))), __sub__ (__mul__ (__getitem__ (vector1, 2), __getitem__ (vector2, 0)), __mul__ (__getitem__ (vector1, 0), __getitem__ (vector2, 2))), __sub__ (__mul__ (__getitem__ (vector1, 0), __getitem__ (vector2, 1)), __mul__ (__getitem__ (vector1, 1), __getitem__ (vector2, 0))));
 	});}
 });
 export var Vector4D =  __class__ ('Vector4D', [Vector], {
@@ -540,10 +457,7 @@ export var Vector4D =  __class__ ('Vector4D', [Vector], {
 		var args = tuple ([].slice.apply (arguments).slice (1));
 		__call__ (__call__ (__super__, null, Vector4D, '__init__'), null, self, ...args);
 		while (__lt__ (__call__ (len, null, self.coord), 3)) {
-			(function () {
-				var __accu0__ = self.coord;
-				return __call__ (__accu0__.append, __accu0__, 0.0);
-			}) ();
+			__call__ (self.coord.append, self.coord, 0.0);
 		}
 		if (__lt__ (__call__ (len, null, self.coord), 4)) {
 			__setitem__ (self.coord, 3, 1);
