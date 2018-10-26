@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-10-25 19:53:40
+// Transcrypt'ed from Python, 2018-10-25 22:19:05
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Vector3D, Vector4D} from './py_vector.js';
 import {clear_canvas, init_webgl_inst, select_shaders, webgl_render} from './webgl_utils.js';
@@ -107,6 +107,32 @@ function render() {
 
     //  now, draw sphere model
     modelview = initialmodelview;
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    sphere.render();
+
+
+    //  now, draw sphere model
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(0,20,0));
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    sphere.render();
+
+    //  now, draw sphere model
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(0,40,0));
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    sphere.render();
+
+    //  now, draw sphere model
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(0,60,0));
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
     normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
     modelview = mult(modelview, scale(0.5, 0.5, 0.5));
     sphere.render();
@@ -127,32 +153,45 @@ function render() {
          //random directions
         var axis = normalize(vec3(0,1,0)); //vec3(Math.random(), Math.random(), Math.random());
         var angle = x; //Math.random() * 360;
+
+        var rotate_mat = rotate(angle, axis);
         
-        cumul_trans = mult(cumul_trans, translate(trans*axis[0], trans*axis[1], trans*axis[2]));
+        var direction = mult(mat4(), rotate_mat);
 
-        //  now, draw cylinder model
-        modelview = initialmodelview;
-        modelview = mult(modelview, cumul_trans);
-        modelview = mult(modelview, rotate(angle, axis));
-        normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-        modelview = mult(modelview, scale(scalex, scaley, scalez));
-        cylinder.render();
-
-        cumul_trans = mult(cumul_trans, translate(trans*axis[0], trans*axis[1], trans*axis[2]));
 
         //  now, draw sphere model
         modelview = initialmodelview;
-        modelview = mult(modelview, cumul_trans);
+        //modelview = mult(modelview, cumul_trans);
+        //modelview = mult(modelview, rotate_mat);
+        modelview = mult(modelview, translate(0.0,0.0,cy_heigth));
         normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
         modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+        
         sphere.render();
+
+
+        cumul_trans = mult(cumul_trans, translate(0.0, trans, 0.0));
+
+
+        //  now, draw cylinder model
+        modelview = initialmodelview;
+        //modelview = mult(modelview, cumul_trans);
+        modelview = mult(modelview, rotate_mat);
+        modelview = mult(modelview, translate(0.0,0.0,trans));
+        normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+        modelview = mult(modelview, scale(scalex, scaley, scalez));
+        //cylinder.render();
+
+        cumul_trans = mult(cumul_trans, translate(0.0, trans, 0.0));
 
         
     }
     
-    for (var i = 0; i < 3; i++)
-        render_loop(80.0+10*i);
+    for (var i = 0; i < 1; i++) {
+        //render_loop(80.0+20*i);
 	}
+
+}
 
 
 function unflatten(matrix) {
@@ -342,7 +381,10 @@ export var js_list = function (iterable) {
 			var __iterable0__ = iterable;
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var i = __getitem__ (__iterable0__, __index0__);
-				__call__ (__accu0__.append, __accu0__, __call__ (js_list, null, i));
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __call__ (js_list, null, i));
+				}) ();
 			}
 			return __accu0__;
 		}) ();
