@@ -1,19 +1,10 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-// Transcrypt'ed from Python, 2018-10-25 22:19:05
-=======
-// Transcrypt'ed from Python, 2018-10-25 15:56:48
->>>>>>> parent of 14aa77b... unsuccessfull variable displacement
-=======
-// Transcrypt'ed from Python, 2018-10-25 19:53:40
->>>>>>> parent of cd6b252... fail
+// Transcrypt'ed from Python, 2018-10-26 12:57:24
 var __name__ = 'org.transcrypt.__runtime__';
 export var __envir__ = {};
 __envir__.interpreter_name = 'python';
 __envir__.transpiler_name = 'transcrypt';
 __envir__.executor_name = __envir__.transpiler_name;
-__envir__.transpiler_version = '3.7.4';
- 
+__envir__.transpiler_version = '3.7.6';
 
 export function __nest__ (headObject, tailNames, value) {
     var current = headObject;
@@ -723,6 +714,9 @@ Array.prototype.__getslice__ = function (start, stop, step) {
     }
     else if (stop > this.length) {
         stop = this.length;
+    }
+    if (step == 1) {
+        return Array.prototype.slice.call(this, start, stop);
     }
     let result = list ([]);
     for (let index = start; index < stop; index += step) {
