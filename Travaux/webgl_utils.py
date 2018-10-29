@@ -17,13 +17,23 @@ __pragma__('js', '{}', """
 //Initialise WebGL""")
 def init_webgl_inst():
     canvas = document.getElementById("gl-canvas")
-    gl = WebGLUtils.setupWebGL(canvas)
-    if not gl:
-        alert("WebGL isn't available")
+    gl = canvas.getContext("webgl")
+    if (not gl):
+        gl = canvas.getContext("experimental-webgl")
+    
+    if (not gl) :
+        raise "Could not create WebGL context."
 
-    gl.viewport(0, 0, canvas.width, canvas.height)
-    gl.clearColor(1.0, 1.0, 1.0, 1.0)
     gl.enable(gl.DEPTH_TEST)
+    
+    # canvas = document.getElementById("gl-canvas")
+    # gl = WebGLUtils.setupWebGL(canvas)
+    # if not gl:
+    #     alert("WebGL isn't available")
+
+    # gl.viewport(0, 0, canvas.width, canvas.height)
+    # gl.clearColor(1.0, 1.0, 1.0, 1.0)
+    # gl.enable(gl.DEPTH_TEST)
 
     return gl
 

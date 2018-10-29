@@ -61,101 +61,109 @@ function render() {
 
     //  now, draw sphere model
     modelview = initialmodelview;
-    modelview = mult(modelview, translate(15.0, 0.0, 0.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    //modelview = mult(modelview, translate(15.0, 0.0, 0.0));
+    //modelview = mult(modelview, rotate(0.0, 1, 0, 0));
     normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
     modelview = mult(modelview, scale(0.5, 0.5, 0.5));
     sphere.render();
 
-    //  now, draw box model
+    //  now, draw sphere model
     modelview = initialmodelview;
-    modelview = mult(modelview, translate(10.0, 10.0, 0.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    modelview = mult(modelview, translate(0.0, 0.0, 15.0));
+    //modelview = mult(modelview, rotate(0.0, 1, 0, 0));
     normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
     modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    box.render();
+    sphere.render();
+
+    // //  now, draw box model
+    // modelview = initialmodelview;
+    // modelview = mult(modelview, translate(10.0, 10.0, 0.0));
+    // modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    // normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    // modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    // box.render();
 		
-    //  now, draw cylinder model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(0.0, 15.0, 0.0));
-    modelview = mult(modelview, rotate(90.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.3, 0.3, 0.3));
-    cylinder.render();
+    // //  now, draw cylinder model
+    // modelview = initialmodelview;
+    // modelview = mult(modelview, translate(0.0, 15.0, 0.0));
+    // modelview = mult(modelview, rotate(90.0, 1, 0, 0));
+    // normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    // modelview = mult(modelview, scale(0.3, 0.3, 0.3));
+    // cylinder.render();
 
-    //  now, draw cone model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(-10.0, 10.0, 0.0));
-    modelview = mult(modelview, rotate(-90.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    cone.render();
+    // //  now, draw cone model
+    // modelview = initialmodelview;
+    // modelview = mult(modelview, translate(-10.0, 10.0, 0.0));
+    // modelview = mult(modelview, rotate(-90.0, 1, 0, 0));
+    // normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    // modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    // cone.render();
 		
-    //  now, draw torus model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(-15.0, -2.0, 0.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.3, 0.3, 0.3));
-    torus.render();
+    // //  now, draw torus model
+    // modelview = initialmodelview;
+    // modelview = mult(modelview, translate(-15.0, -2.0, 0.0));
+    // modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    // normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    // modelview = mult(modelview, scale(0.3, 0.3, 0.3));
+    // torus.render();
 		
-    //  now, draw disk model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(-8.0, -12.0, 0.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    disk.render();
+    // //  now, draw disk model
+    // modelview = initialmodelview;
+    // modelview = mult(modelview, translate(-8.0, -12.0, 0.0));
+    // modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    // normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    // modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    // disk.render();
 
-	//  now, draw teapot model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(7.0, -11.0, 0.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    teapot.render();
+	// //  now, draw teapot model
+    // modelview = initialmodelview;
+    // modelview = mult(modelview, translate(7.0, -11.0, 0.0));
+    // modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    // normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    // modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    // teapot.render();
 
-	    //  now, draw hemisphere model (with a thin circular rim)
-		//      Note that this could be done more elegantly using two sets of shaders
-		//         (one for the inside and one for the outside of the same hemisphere)
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(0.0, 15.0, -15.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    hemisphereoutside.render();
-	modelview = mult(modelview, scale(0.95, 0.95, 0.95));  // MAKE SURE THE INSIDE IS SMALLER THAN THE OUTSIDE
-    hemisphereinside.render();  // in this model, the normals are inverted
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(0.0, 15.0, -15.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-	thindisk.render();
+	//     //  now, draw hemisphere model (with a thin circular rim)
+	// 	//      Note that this could be done more elegantly using two sets of shaders
+	// 	//         (one for the inside and one for the outside of the same hemisphere)
+    // modelview = initialmodelview;
+    // modelview = mult(modelview, translate(0.0, 15.0, -15.0));
+    // modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    // normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    // modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    // hemisphereoutside.render();
+	// modelview = mult(modelview, scale(0.95, 0.95, 0.95));  // MAKE SURE THE INSIDE IS SMALLER THAN THE OUTSIDE
+    // hemisphereinside.render();  // in this model, the normals are inverted
+    // modelview = initialmodelview;
+    // modelview = mult(modelview, translate(0.0, 15.0, -15.0));
+    // modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    // normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    // modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+	// thindisk.render();
 
-	    //  now, draw quartersphere model
- 		//      Note that this could be done more elegantly using two sets of shaders
-		//         (one for the inside and one for the outside of the same hemisphere)
-	modelview = initialmodelview;
-    modelview = mult(modelview, translate(0.0, 0.0, -15.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    quartersphereoutside.render();
-	modelview = mult(modelview, scale(0.95, 0.95, 0.95));  // MAKE SURE THE INSIDE IS SMALLER THAN THE OUTSIDE
-    quartersphereinside.render();  // in this model, the normals are inverted
+	//     //  now, draw quartersphere model
+ 	// 	//      Note that this could be done more elegantly using two sets of shaders
+	// 	//         (one for the inside and one for the outside of the same hemisphere)
+	// modelview = initialmodelview;
+    // modelview = mult(modelview, translate(0.0, 0.0, -15.0));
+    // modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    // normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    // modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    // quartersphereoutside.render();
+	// modelview = mult(modelview, scale(0.95, 0.95, 0.95));  // MAKE SURE THE INSIDE IS SMALLER THAN THE OUTSIDE
+    // quartersphereinside.render();  // in this model, the normals are inverted
 
-	    //  now, draw a flattened hemisphere
-		//      Note that this could be done more elegantly using two sets of shaders
-		//         (one for the inside and one for the outside of the same hemisphere)
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(0.0, -15.0, -15.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.8, 0.2, 0.5));
-    hemisphereoutside.render();
-	modelview = mult(modelview, scale(0.95, 0.95, 0.95));  // MAKE SURE THE INSIDE IS SMALLER THAN THE OUTSIDE
-    hemisphereinside.render();  // in this model, the normals are inverted
+	//     //  now, draw a flattened hemisphere
+	// 	//      Note that this could be done more elegantly using two sets of shaders
+	// 	//         (one for the inside and one for the outside of the same hemisphere)
+    // modelview = initialmodelview;
+    // modelview = mult(modelview, translate(0.0, -15.0, -15.0));
+    // modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    // normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    // modelview = mult(modelview, scale(0.8, 0.2, 0.5));
+    // hemisphereoutside.render();
+	// modelview = mult(modelview, scale(0.95, 0.95, 0.95));  // MAKE SURE THE INSIDE IS SMALLER THAN THE OUTSIDE
+    // hemisphereinside.render();  // in this model, the normals are inverted
 
 
 	}
@@ -253,8 +261,7 @@ window.onload = function init() {
 
     }
     catch (e) {
-        document.getElementById("message").innerHTML =
-             "Could not initialize WebGL: " + e;
+        document.getElementById("message").innerHTML ="Could not initialize WebGL: " + e;
         return;
     }
 

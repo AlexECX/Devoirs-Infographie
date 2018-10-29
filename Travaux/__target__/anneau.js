@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-10-26 12:57:25
+// Transcrypt'ed from Python, 2018-10-29 15:33:53
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Vector3D, Vector4D} from './py_vector.js';
 import {clear_canvas, init_webgl_inst, select_shaders, webgl_render} from './webgl_utils.js';
@@ -11,7 +11,7 @@ The main module:
   using the appropriate subset of points/vectors, with different colors. 
 */
 export var gl = null;
-export var program = null;
+export var prog = null;
 //Dimension of render
 export var render_D = 3;
 export var CoordsLoc = null;
@@ -56,7 +56,11 @@ export var draw = function () {
 	//init
 	gl = init_webgl_inst ();
 	var canvas = document.getElementById ('gl-canvas');
-	var prog = select_shaders (gl, 'vshader', 'fshader');
+	//LOAD SHADER (standard texture mapping)
+	var vertexShaderSource = getTextContent ('vshader');
+	var fragmentShaderSource = getTextContent ('fshader');
+	prog = createProgram (gl, vertexShaderSource, fragmentShaderSource);
+	gl.useProgram (prog);
 	CoordsLoc = gl.getAttribLocation (prog, 'vcoords');
 	NormalLoc = gl.getAttribLocation (prog, 'vnormal');
 	TexCoordLoc = gl.getAttribLocation (prog, 'vtexcoord');
@@ -88,6 +92,7 @@ export var draw_cylinder = function () {
 export var draw_sphere = function () {
 	// pass;
 };
+
 
 function render() {
     gl.clearColor(0.79, 0.76, 0.27, 1);
@@ -125,35 +130,41 @@ function render() {
     function render_loop(x) {
 
         //random directions
-        var axis = normalize(x); //;
-        //var angle = x; //Math.random() * 360;
+        var axis = normalize(x); //vec3(Math.random(), Math.random(), Math.random());
+        var angle = x; //Math.random() * 360;
 
         var myvec = normalize(vec3(0,0,trans));
-        var direct_vect = normalize(mult(axis, vec3(cy_heigth,cy_heigth,cy_heigth)));
-        var result = dot(myvec, direct_vect);
-        var rotate_angle = Math.acos(result) * (180/Math.PI);
-        var direct = ([-axis[0], axis[1], axis[2]]);
-        var rotate_mat = rotate(rotate_angle, direct);
+        var result = dot(myvec, axis);
+        var len1 = length(vec3(0,0,trans));
+        var len2 = length(axis);
+        var rotate_angle = Math.acos(result / (len1 * len2)) * (180/Math.PI);
+        var rotate_mat = null;
+        if (x[0]) {
+            var rotate_mat = rotate(90, 0, x[0]*1, 0);
+        } else if (x[1]) {
+            var rotate_mat = rotate(90,  x[1]*1, 0, 0);
+        } 
 
 
-        
-        
+        var deplace = mult(axis, vec3(trans,trans,trans));
+        cumul_trans = mult(cumul_trans, translate(deplace));
+
         //  now, draw cylinder model
         modelview = initialmodelview;
-        //modelview = mult(modelview, cumul_trans);
-        modelview = mult(modelview, rotate_mat);
-        modelview = mult(modelview, translate(0.0,0.0,trans));
+        modelview = mult(modelview, cumul_trans);
+        if (rotate_mat) {
+            modelview = mult(modelview, rotate_mat);
+        }
         normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
         modelview = mult(modelview, scale(scalex, scaley, scalez));
         cylinder.render();
 
-        var direction = mult(axis, vec3(cy_heigth,cy_heigth,cy_heigth));
-        cumul_trans = mult(cumul_trans, translate(direction));
-
+        cumul_trans = mult(cumul_trans, translate(deplace));
+        
 
         //  now, draw sphere model
         modelview = initialmodelview;
-        modelview = mult(modelview, translate(direction));
+        modelview = mult(modelview, cumul_trans);
         normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
         modelview = mult(modelview, scale(0.5, 0.5, 0.5));
         sphere.render();
@@ -162,11 +173,138 @@ function render() {
         
     }
     
-    for (var i = 0; i < 3; i++) {
-        render_loop(vec3(1+i, 1-i, 1*i));
-	}
+    render_loop(vec3(1,0,0));
+    render_loop(vec3(0,1,0));
+    render_loop(vec3(0,0,1));
+    render_loop(vec3(-1,0,0));
+    render_loop(vec3(0,-1,0));
+    render_loop(vec3(0,0,-1));
+
+   
+    render_loop(vec3(0,0,-1));
+    render_loop(vec3(1,0,0));
+    render_loop(vec3(0,-1,0));
+    render_loop(vec3(0,1,0));
+    render_loop(vec3(0,0,1));
+    render_loop(vec3(-1,0,0));
+    
 
 }
+/*
+function render() {
+    gl.clearColor(0.79, 0.76, 0.27, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    //--- Get the rotation matrix obtained by the displacement of the mouse
+    //---  (note: the matrix obtained is already "flattened" by the function getViewMatrix)
+    flattenedmodelview = rotator.getViewMatrix();
+    modelview = unflatten(flattenedmodelview);
+
+	normalMatrix = extractNormalMatrix(modelview);
+		
+    var initialmodelview = modelview;
+
+    //  now, draw sphere model
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(15.0, 0.0, 0.0));
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    sphere.render();
+
+    //  now, draw box model
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(10.0, 10.0, 0.0));
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    box.render();
+		
+    //  now, draw cylinder model
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(0.0, 15.0, 0.0));
+    modelview = mult(modelview, rotate(90.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.3, 0.3, 0.3));
+    cylinder.render();
+
+    //  now, draw cone model
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(-10.0, 10.0, 0.0));
+    modelview = mult(modelview, rotate(-90.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    cone.render();
+		
+    //  now, draw torus model
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(-15.0, -2.0, 0.0));
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.3, 0.3, 0.3));
+    torus.render();
+		
+    //  now, draw disk model
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(-8.0, -12.0, 0.0));
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    disk.render();
+
+	//  now, draw teapot model
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(7.0, -11.0, 0.0));
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    teapot.render();
+
+	    //  now, draw hemisphere model (with a thin circular rim)
+		//      Note that this could be done more elegantly using two sets of shaders
+		//         (one for the inside and one for the outside of the same hemisphere)
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(0.0, 15.0, -15.0));
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    hemisphereoutside.render();
+	modelview = mult(modelview, scale(0.95, 0.95, 0.95));  // MAKE SURE THE INSIDE IS SMALLER THAN THE OUTSIDE
+    hemisphereinside.render();  // in this model, the normals are inverted
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(0.0, 15.0, -15.0));
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+	thindisk.render();
+
+	    //  now, draw quartersphere model
+ 		//      Note that this could be done more elegantly using two sets of shaders
+		//         (one for the inside and one for the outside of the same hemisphere)
+	modelview = initialmodelview;
+    modelview = mult(modelview, translate(0.0, 0.0, -15.0));
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
+    quartersphereoutside.render();
+	modelview = mult(modelview, scale(0.95, 0.95, 0.95));  // MAKE SURE THE INSIDE IS SMALLER THAN THE OUTSIDE
+    quartersphereinside.render();  // in this model, the normals are inverted
+
+	    //  now, draw a flattened hemisphere
+		//      Note that this could be done more elegantly using two sets of shaders
+		//         (one for the inside and one for the outside of the same hemisphere)
+    modelview = initialmodelview;
+    modelview = mult(modelview, translate(0.0, -15.0, -15.0));
+    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
+    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
+    modelview = mult(modelview, scale(0.8, 0.2, 0.5));
+    hemisphereoutside.render();
+	modelview = mult(modelview, scale(0.95, 0.95, 0.95));  // MAKE SURE THE INSIDE IS SMALLER THAN THE OUTSIDE
+    hemisphereinside.render();  // in this model, the normals are inverted
+
+
+	}
+*/
 
 
 function unflatten(matrix) {
@@ -356,10 +494,7 @@ export var js_list = function (iterable) {
 			var __iterable0__ = iterable;
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var i = __getitem__ (__iterable0__, __index0__);
-				(function () {
-					var __accu1__ = __accu0__;
-					return __call__ (__accu1__.append, __accu1__, __call__ (js_list, null, i));
-				}) ();
+				__call__ (__accu0__.append, __accu0__, __call__ (js_list, null, i));
 			}
 			return __accu0__;
 		}) ();
