@@ -4,6 +4,6 @@
    //     "*.py": "javascript",
     },
 
-    "javascript.validate.enable": true
-
+    "javascript.validate.enable": true,
+    "python.linting.enabled": true
 }

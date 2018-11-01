@@ -186,199 +186,90 @@ def draw_cylinder():
 def draw_sphere():
     pass
 
+def render():
+    global flattenedmodelview, modelview, normalMatrix
+    gl.clearColor(0.79, 0.76, 0.27, 1)
+    clear_canvas(gl)
+
+    __pragma__('js', '{}', '//--- Get the rotation matrix obtained by the displacement of the mouse')
+    __pragma__('js', '{}', '//---  (note: the matrix obtained is already "flattened" by the function getViewMatrix)')
+    flattenedmodelview = rotator.getViewMatrix()
+    modelview = unflatten(flattenedmodelview)
+
+    normalMatrix = extractNormalMatrix(modelview)
+		
+    initialmodelview = modelview
+
+    __pragma__('js', '{}', '//  now, draw sphere model')
+    modelview = initialmodelview
+    __pragma__('js', '{}', '// always extract the normal matrix before scaling')
+    normalMatrix = extractNormalMatrix(modelview)  
+    modelview = mult(modelview, scale(0.5, 0.5, 0.5))
+    sphere.render()
+
+    __pragma__('js', '{}', '//position matrix')
+    cumul_trans = translate(0.0, 0.0, 0.0)
+    
+    __pragma__('js', '{}', '//Cylinder fixed dimensions')
+    scale_factor = 0.5
+    scalex = 0.2
+    scaley = 0.2
+    scalez = 1
+    cy_heigth = 20.0 * scalez
+    trans = cy_heigth/2
+
+    directions = [
+        vec3(1,0,0),
+        vec3(0,1,0),
+        vec3(0,0,1),
+        vec3(-1,0,0),
+        vec3(0,-1,0),
+        vec3(0,0,-1),
+    ]
+
+    next_directions = directions
+
+    def render_loop():
+        global modelview, normalMatrix, next_directions, cumul_trans, prev_direction
+        index = Math.floor(Math.random() * Math.floor(len(next_directions)))
+        #//random directions
+        direction = normalize(next_directions[index])# //vec3(Math.random(), Math.random(), Math.random())
+        next_directions = [i for i in directions if i != directions[index-3]]
+        rotate_mat = None
+        if direction[0]:
+            rotate_mat = rotate(90.0, 0.0, direction[0], 0.0)
+        elif direction[1]:
+            rotate_mat = rotate(90.0, direction[1], 0.0, 0.0)
+
+        deplacement = mult(direction, vec3(trans,trans,trans))
+        cumul_trans = mult(cumul_trans, translate(deplacement))
+
+
+       # //  now, draw cylinder model
+        modelview = initialmodelview
+        modelview = mult(modelview, cumul_trans)
+        if rotate_mat:
+            modelview = mult(modelview, rotate_mat)
+        normalMatrix = extractNormalMatrix(modelview)  #// always extract the normal matrix before scaling
+        modelview = mult(modelview, scale(scalex, scaley, scalez))
+        cylinder.render()
+
+        deplacement = mult(direction, vec3(trans,trans,trans))
+        cumul_trans = mult(cumul_trans, translate(deplacement))
+
+       # if not prev_direction == direction:
+        #//  now, draw sphere model
+        modelview = initialmodelview
+        modelview = mult(modelview, cumul_trans)
+        normalMatrix = extractNormalMatrix(modelview)  #// always extract the normal matrix before scaling
+        modelview = mult(modelview, scale(0.5, 0.5, 0.5))
+        sphere.render()
+
+    setInterval(render_loop, 300)
+    
+    
+
 __pragma__('js', '{}', """
-
-function render() {
-    gl.clearColor(0.79, 0.76, 0.27, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    //--- Get the rotation matrix obtained by the displacement of the mouse
-    //---  (note: the matrix obtained is already "flattened" by the function getViewMatrix)
-    flattenedmodelview = rotator.getViewMatrix();
-    modelview = unflatten(flattenedmodelview);
-
-	normalMatrix = extractNormalMatrix(modelview);
-		
-    var initialmodelview = modelview;
-
-    //position matrix
-    var cumul_trans = translate(0.0, 0.0, 0.0)
-
-    //  now, draw sphere model
-    modelview = initialmodelview;
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    sphere.render();
-
-    
-    //Cylinder fixed
-    var scale_factor = 0.5
-    var scalex = 0.2
-    var scaley = 0.2
-    var scalez = 1
-    var cy_heigth = 20.0 * scalez
-    var trans = cy_heigth / 2.0 
-
-    
-
-    function render_loop(x) {
-
-        //random directions
-        var axis = normalize(vec3(0,1,0)); //vec3(Math.random(), Math.random(), Math.random());
-        var angle = x; //Math.random() * 360;
-
-        var myvec = normalize(vec3(0,0,trans));
-        var result = dot(myvec, axis);
-        var len1 = length(vec3(0,0,trans));
-        var len2 = length(axis);
-        var rotate_angle = Math.acos(result / (len1 * len2)) * (180/Math.PI);
-        var rotate_mat = rotate(rotate_angle, axis);
-
-
-        //  now, draw cylinder model
-        modelview = initialmodelview;
-        modelview = mult(modelview, cumul_trans);
-        modelview = mult(modelview, rotate_mat);
-        modelview = mult(modelview, translate(0.0,0.0,trans));
-        normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-        modelview = mult(modelview, scale(scalex, scaley, scalez));
-        cylinder.render();
-
-        var direction = mult(axis, vec3(cy_heigth,cy_heigth,cy_heigth));
-        cumul_trans = mult(cumul_trans, translate(direction));
-
-        //  now, draw sphere model
-        modelview = initialmodelview;
-        modelview = mult(modelview, cumul_trans);
-        normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-        modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-        sphere.render();
-
-
-        
-    }
-    
-    for (var i = 0; i < 1; i++) {
-        render_loop(50);
-	}
-
-}
-/*
-function render() {
-    gl.clearColor(0.79, 0.76, 0.27, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    //--- Get the rotation matrix obtained by the displacement of the mouse
-    //---  (note: the matrix obtained is already "flattened" by the function getViewMatrix)
-    flattenedmodelview = rotator.getViewMatrix();
-    modelview = unflatten(flattenedmodelview);
-
-	normalMatrix = extractNormalMatrix(modelview);
-		
-    var initialmodelview = modelview;
-
-    //  now, draw sphere model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(15.0, 0.0, 0.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    sphere.render();
-
-    //  now, draw box model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(10.0, 10.0, 0.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    box.render();
-		
-    //  now, draw cylinder model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(0.0, 15.0, 0.0));
-    modelview = mult(modelview, rotate(90.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.3, 0.3, 0.3));
-    cylinder.render();
-
-    //  now, draw cone model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(-10.0, 10.0, 0.0));
-    modelview = mult(modelview, rotate(-90.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    cone.render();
-		
-    //  now, draw torus model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(-15.0, -2.0, 0.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.3, 0.3, 0.3));
-    torus.render();
-		
-    //  now, draw disk model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(-8.0, -12.0, 0.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    disk.render();
-
-	//  now, draw teapot model
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(7.0, -11.0, 0.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    teapot.render();
-
-	    //  now, draw hemisphere model (with a thin circular rim)
-		//      Note that this could be done more elegantly using two sets of shaders
-		//         (one for the inside and one for the outside of the same hemisphere)
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(0.0, 15.0, -15.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    hemisphereoutside.render();
-	modelview = mult(modelview, scale(0.95, 0.95, 0.95));  // MAKE SURE THE INSIDE IS SMALLER THAN THE OUTSIDE
-    hemisphereinside.render();  // in this model, the normals are inverted
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(0.0, 15.0, -15.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-	thindisk.render();
-
-	    //  now, draw quartersphere model
- 		//      Note that this could be done more elegantly using two sets of shaders
-		//         (one for the inside and one for the outside of the same hemisphere)
-	modelview = initialmodelview;
-    modelview = mult(modelview, translate(0.0, 0.0, -15.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5));
-    quartersphereoutside.render();
-	modelview = mult(modelview, scale(0.95, 0.95, 0.95));  // MAKE SURE THE INSIDE IS SMALLER THAN THE OUTSIDE
-    quartersphereinside.render();  // in this model, the normals are inverted
-
-	    //  now, draw a flattened hemisphere
-		//      Note that this could be done more elegantly using two sets of shaders
-		//         (one for the inside and one for the outside of the same hemisphere)
-    modelview = initialmodelview;
-    modelview = mult(modelview, translate(0.0, -15.0, -15.0));
-    modelview = mult(modelview, rotate(0.0, 1, 0, 0));
-    normalMatrix = extractNormalMatrix(modelview);  // always extract the normal matrix before scaling
-    modelview = mult(modelview, scale(0.8, 0.2, 0.5));
-    hemisphereoutside.render();
-	modelview = mult(modelview, scale(0.95, 0.95, 0.95));  // MAKE SURE THE INSIDE IS SMALLER THAN THE OUTSIDE
-    hemisphereinside.render();  // in this model, the normals are inverted
-
-
-	}
-*/
-
 
 function unflatten(matrix) {
     var result = mat4();
