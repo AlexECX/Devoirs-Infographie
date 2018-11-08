@@ -15,7 +15,7 @@ The main module:
 */""")
 
 
-gl = None
+__pragma__('js', 'var gl')
 prog = None
 __pragma__('js', '//Dimension of render')
 render_D = 3
@@ -52,6 +52,7 @@ hemisphereoutside = None
 thindisk = None
 quartersphereinside = None
 quartersphereoutside = None
+wing = None
 
 
 lightPosition = vec4(20.0, 20.0, 100.0, 1.0)
@@ -91,7 +92,7 @@ def draw():
     global render_D
     global trirec, sphere, cylinder, box, teapot, disk, torus, cone,  \
         hemisphereinside, hemisphereoutside, thindisk, \
-        quartersphereinside, quartersphereoutside
+        quartersphereinside, quartersphereoutside, wing
     global ambientProduct, diffuseProduct, specularProduct
     global CoordsLoc, NormalLoc, TexCoordLoc, ProjectionLoc, ModelviewLoc, \
         NormalMatrixLoc, projection, modelview, flattenedmodelview, \
@@ -157,9 +158,10 @@ def draw():
     # texture coordinates and indices.
     #
 
-    sphere = createModel(uvSphere(10.0, 25.0, 25.0))
-    cylinder = createModel(uvCylinder(10.0, 20.0, 25.0, False, False))
+    # sphere = createModel(uvSphere(10.0, 25.0, 25.0))
+    # cylinder = createModel(uvCylinder(10.0, 20.0, 25.0, False, False))
     trirec = createModel(triangle_rectangle(10.0))
+    wing = Wing()
     # box = createModel(cube(10.0))
 
     # teapot = createModel(teapotModel)
@@ -196,97 +198,13 @@ def render():
 
     flattenedmodelview = rotator.getViewMatrix()
     modelview = unflatten(flattenedmodelview)
-
+    initialModelView = modelview
     normalMatrix = extractNormalMatrix(modelview)
 
-    initialmodelview = modelview
+    wing.traverse()
+    #trirec.render()
 
-    modelview = initialmodelview
-    normalMatrix = extractNormalMatrix(modelview)
-    modelview = mult(modelview, scale(2, 1, 1))
-    trirec.render()
-
-# def render():
-#     global flattenedmodelview, modelview, normalMatrix
-#     gl.clearColor(0.79, 0.76, 0.27, 1)
-#     clear_canvas(gl)
-
-#     __pragma__('js', '{}', '//--- Get the rotation matrix obtained by the displacement of the mouse')
-#     __pragma__('js', '{}', '//---  (note: the matrix obtained is already "flattened" by the function getViewMatrix)')
-#     flattenedmodelview = rotator.getViewMatrix()
-#     modelview = unflatten(flattenedmodelview)
-
-#     normalMatrix = extractNormalMatrix(modelview)
-
-#     initialmodelview = modelview
-
-#     __pragma__('js', '{}', '//  now, draw sphere model')
-#     modelview = initialmodelview
-#     __pragma__('js', '{}', '// always extract the normal matrix before scaling')
-#     normalMatrix = extractNormalMatrix(modelview)
-#     modelview = mult(modelview, scale(0.5, 0.5, 0.5))
-#     sphere.render()
-
-#     __pragma__('js', '{}', '//position matrix')
-#     cumul_trans = translate(0.0, 0.0, 0.0)
-
-#     __pragma__('js', '{}', '//Cylinder fixed dimensions')
-#     scale_factor = 0.5
-#     scalex = 0.2
-#     scaley = 0.2
-#     scalez = 1
-#     cy_heigth = 20.0 * scalez
-#     trans = cy_heigth/2
-#     __pragma__('js', '{}', '//list of possible directions')
-#     directions = [
-#         vec3(1,0,0),
-#         vec3(0,1,0),
-#         vec3(0,0,1),
-#         vec3(-1,0,0),
-#         vec3(0,-1,0),
-#         vec3(0,0,-1),
-#     ]
-
-#     next_directions = directions
-
-#     def render_loop():
-#         global modelview, normalMatrix, next_directions, cumul_trans
-#         index = Math.floor(Math.random() * Math.floor(len(next_directions)))
-#         #//random directions
-#         direction = normalize(next_directions[index])# //vec3(Math.random(), Math.random(), Math.random())
-#         __pragma__('js', '{}', '//to prevent going backwards')
-#         next_directions = [i for i in directions if not equal(i, negate(direction))]
-#         rotate_mat = None
-#         if direction[0]:
-#             rotate_mat = rotate(90.0, 0.0, direction[0], 0.0)
-#         elif direction[1]:
-#             rotate_mat = rotate(90.0, direction[1], 0.0, 0.0)
-
-#         deplacement = mult(direction, vec3(trans,trans,trans))
-#         cumul_trans = mult(cumul_trans, translate(deplacement))
-
-
-#         __pragma__('js', '{}', '//  now, draw cylinder model')
-#         modelview = initialmodelview
-#         modelview = mult(modelview, cumul_trans)
-#         if rotate_mat:
-#             modelview = mult(modelview, rotate_mat)
-#         normalMatrix = extractNormalMatrix(modelview)  #// always extract the normal matrix before scaling
-#         modelview = mult(modelview, scale(scalex, scaley, scalez))
-#         cylinder.render()
-
-#         deplacement = mult(direction, vec3(trans,trans,trans))
-#         cumul_trans = mult(cumul_trans, translate(deplacement))
-
-#         __pragma__('js', '{}', '//  now, draw sphere model')
-#         modelview = initialmodelview
-#         modelview = mult(modelview, cumul_trans)
-#         normalMatrix = extractNormalMatrix(modelview)  #// always extract the normal matrix before scaling
-#         modelview = mult(modelview, scale(0.5, 0.5, 0.5))
-#         sphere.render()
-
-#     __pragma__('js', '{}', '//doesnt work well, erases previous renders. A for loop doenst have this problem')
-#     setInterval(render_loop, 300)
+    modelview = initialModelView
 
 
 __pragma__('js', '{}', """
@@ -459,49 +377,70 @@ function resize(canvas) {  // ref. https://webglfundamentals.org/webgl/lessons/w
 """)
 
 
-__pragma__('js', """\n//rx, ry, rz, rotation matrix """)
+class Node:
+    
+    def __init__(self, transform=None, render=None, sibling=None, child=None):
+        self.transform = transform
+        self.render = render
+        self.sibling = sibling
+        self.child = child
 
 
-# def matrice_rxz():
 
-#     angles = [radians(theta[0]), radians(theta[1]), radians(theta[2])]
-#     c = vec3(Math.cos(angles[0]), Math.cos(angles[1]), Math.cos(angles[2]))
-#     s = vec3(Math.sin(angles[0]), Math.sin(angles[1]), Math.sin(angles[2]))
+class Wing:
+    
+    figure = []
+    points_list = []
+    stack = []
+    modelViewMatrix = mat4()
+    #m = None
 
-#     rx = mat4(1.0,  0.0,  0.0, 0.0,
-#               0.0,  c[0],  -s[0], 0.0,
-#               0.0, s[0],  c[0], 0.0,
-#               0.0,  0.0,  0.0, 1.0)
+    def __init__(self):
+        global gl
+        
+        m = mat4()
+        #m = mult(m, translate(5,0,0))
+        #m = mult(m, rotate(20.0, 0,0,1))
 
-#     ry = mat4(c[1], 0.0, s[1], 0.0,
-#               0.0, 1.0,  0.0, 0.0,
-#               -s[1], 0.0,  c[1], 0.0,
-#               0.0, 0.0,  0.0, 1.0)
+        self.points_list.append(createModel(cube(20.0)))
+        self.figure.append(Node(m, self.render, None, 1))
 
-#     rz = mat4(c[2],  -s[2], 0.0, 0.0,
-#               s[2],  c[2], 0.0, 0.0,
-#               0.0,  0.0, 1.0, 0.0,
-#               0.0,  0.0, 0.0, 1.0)
-
-#     mat_result = mult(rx, ry)
-#     mat_result = mult(mat_result, rz)
-
-#     return mat_result
+        self.points_list.append(createModel(cube(5.0)))
+        #m = mult(m, translate(20.0-5.0, 0, -20.0))
+        self.figure.append(Node(m, self.render2))
 
 
-def old_render(mode, vertices):
-    global render_D
-    vPositionLoc = gl.getAttribLocation(program, "vPosition")
+    def render(self):
+        global modelview, normalMatrix
+        return
 
-    bufferId = gl.createBuffer()
-    gl.bindBuffer(gl.ARRAY_BUFFER, bufferId)
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW)
+        normalMatrix = extractNormalMatrix(modelview)
+        instanceMatrix = mult(self.modelViewMatrix, scale(1, 0.25, 1))
+        modelview = mult(modelview, instanceMatrix)
+        self.points_list[0].render()
 
-    gl.enableVertexAttribArray(vPositionLoc)
+    def render2(self):
+        global modelview, normalMatrix
 
-    gl.vertexAttribPointer(vPositionLoc, render_D, gl.FLOAT, False, 0, 0)
+        normalMatrix = extractNormalMatrix(modelview)
+        instanceMatrix = mult(self.modelViewMatrix, scale(1, 0.5, 5.0))
+        modelview = mult(modelview, instanceMatrix)
+        self.points_list[1].render()
 
-    webgl_render(gl, program, mode, len(vertices))
+
+    def traverse(self, id=0):
+        
+        self.stack.push(self.modelViewMatrix)
+        self.modelViewMatrix = mult(self.modelViewMatrix, self.figure[id].transform)
+        self.figure[id].render()
+        if self.figure[id].child != None:
+            self.traverse(self.figure[id].child)
+
+        self.modelViewMatrix = self.stack.pop()
+        if self.figure[id].sibling != None:
+            self.traverse(self.figure[id].sibling)
+
+
 
 
 __pragma__('js', '{}', """

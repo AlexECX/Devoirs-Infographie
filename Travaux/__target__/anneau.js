@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-11-06 18:49:24
+// Transcrypt'ed from Python, 2018-11-08 17:46:44
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Vector3D, Vector4D} from './py_vector.js';
 import {clear_canvas, init_webgl_inst, select_shaders, webgl_render} from './webgl_utils.js';
@@ -10,7 +10,7 @@ The main module:
 - The last worker calls a render function. It will render each faces 
   using the appropriate subset of points/vectors, with different colors. 
 */
-export var gl = null;
+var gl
 export var prog = null;
 //Dimension of render
 export var render_D = 3;
@@ -38,6 +38,7 @@ export var hemisphereoutside = null;
 export var thindisk = null;
 export var quartersphereinside = null;
 export var quartersphereoutside = null;
+export var wing = null;
 export var lightPosition = vec4 (20.0, 20.0, 100.0, 1.0);
 export var lightAmbient = vec4 (1.0, 1.0, 1.0, 1.0);
 export var lightDiffuse = vec4 (1.0, 1.0, 1.0, 1.0);
@@ -83,9 +84,8 @@ export var draw = function () {
 	gl.uniform4fv (gl.getUniformLocation (prog, 'lightPosition'), flatten (lightPosition));
 	projection = perspective (70.0, 1.0, 1.0, 200.0);
 	gl.uniformMatrix4fv (ProjectionLoc, false, flatten (projection));
-	sphere = createModel (uvSphere (10.0, 25.0, 25.0));
-	cylinder = createModel (uvCylinder (10.0, 20.0, 25.0, false, false));
 	trirec = createModel (triangle_rectangle (10.0));
+	wing = Wing ();
 	render ();
 };
 export var render = function () {
@@ -93,24 +93,11 @@ export var render = function () {
 	clear_canvas (gl);
 	flattenedmodelview = rotator.getViewMatrix ();
 	modelview = unflatten (flattenedmodelview);
+	var initialModelView = modelview;
 	normalMatrix = extractNormalMatrix (modelview);
-	var initialmodelview = modelview;
-	modelview = initialmodelview;
-	normalMatrix = extractNormalMatrix (modelview);
-	modelview = mult (modelview, scale (2, 1, 1));
-	trirec.render ();
+	wing.traverse ();
+	modelview = initialModelView;
 };
-//--- Get the rotation matrix obtained by the displacement of the mouse
-//---  (note: the matrix obtained is already "flattened" by the function getViewMatrix)
-//  now, draw sphere model
-// always extract the normal matrix before scaling
-//position matrix
-//Cylinder fixed dimensions
-//list of possible directions
-//to prevent going backwards
-//  now, draw cylinder model
-//  now, draw sphere model
-//doesnt work well, erases previous renders. A for loop doenst have this problem
 
 
 function unflatten(matrix) {
@@ -279,17 +266,69 @@ function resize(canvas) {  // ref. https://webglfundamentals.org/webgl/lessons/w
 
 }
 
-
-//rx, ry, rz, rotation matrix 
-export var old_render = function (mode, vertices) {
-	var vPositionLoc = gl.getAttribLocation (program, 'vPosition');
-	var bufferId = gl.createBuffer ();
-	gl.bindBuffer (gl.ARRAY_BUFFER, bufferId);
-	gl.bufferData (gl.ARRAY_BUFFER, flatten (vertices), gl.STATIC_DRAW);
-	gl.enableVertexAttribArray (vPositionLoc);
-	gl.vertexAttribPointer (vPositionLoc, render_D, gl.FLOAT, false, 0, 0);
-	webgl_render (gl, program, mode, len (vertices));
-};
+export var Node =  __class__ ('Node', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, transform, render, sibling, child) {
+		if (typeof transform == 'undefined' || (transform != null && transform.hasOwnProperty ("__kwargtrans__"))) {;
+			var transform = null;
+		};
+		if (typeof render == 'undefined' || (render != null && render.hasOwnProperty ("__kwargtrans__"))) {;
+			var render = null;
+		};
+		if (typeof sibling == 'undefined' || (sibling != null && sibling.hasOwnProperty ("__kwargtrans__"))) {;
+			var sibling = null;
+		};
+		if (typeof child == 'undefined' || (child != null && child.hasOwnProperty ("__kwargtrans__"))) {;
+			var child = null;
+		};
+		self.transform = transform;
+		self.render = render;
+		self.sibling = sibling;
+		self.child = child;
+	});}
+});
+export var Wing =  __class__ ('Wing', [object], {
+	__module__: __name__,
+	figure: list ([]),
+	points_list: list ([]),
+	stack: list ([]),
+	modelViewMatrix: mat4 (),
+	get __init__ () {return __get__ (this, function (self) {
+		var m = mat4 ();
+		self.points_list.append (createModel (cube (20.0)));
+		self.figure.append (Node (m, self.render, null, 1));
+		self.points_list.append (createModel (cube (5.0)));
+		self.figure.append (Node (m, self.render2));
+	});},
+	get render () {return __get__ (this, function (self) {
+		return ;
+		normalMatrix = extractNormalMatrix (modelview);
+		var instanceMatrix = mult (self.modelViewMatrix, scale (1, 0.25, 1));
+		modelview = mult (modelview, instanceMatrix);
+		self.points_list [0].render ();
+	});},
+	get render2 () {return __get__ (this, function (self) {
+		normalMatrix = extractNormalMatrix (modelview);
+		var instanceMatrix = mult (self.modelViewMatrix, scale (1, 0.5, 5.0));
+		modelview = mult (modelview, instanceMatrix);
+		self.points_list [1].render ();
+	});},
+	get traverse () {return __get__ (this, function (self, id) {
+		if (typeof id == 'undefined' || (id != null && id.hasOwnProperty ("__kwargtrans__"))) {;
+			var id = 0;
+		};
+		self.stack.push (self.modelViewMatrix);
+		self.modelViewMatrix = mult (self.modelViewMatrix, self.figure [id].transform);
+		self.figure [id].render ();
+		if (self.figure [id].child != null) {
+			self.traverse (self.figure [id].child);
+		}
+		self.modelViewMatrix = self.stack.py_pop ();
+		if (self.figure [id].sibling != null) {
+			self.traverse (self.figure [id].sibling);
+		}
+	});}
+});
 
 //Recursively converts an iterable implementing __iter__, and all __iter__
 //objects it contains, into bare list objects
