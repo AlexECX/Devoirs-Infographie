@@ -19,24 +19,27 @@ gl = None
 prog = None
 __pragma__('js', '//Dimension of render')
 render_D = 3
-#othrt
-CoordsLoc = None      # Location of the coords attribute variable in the standard texture mappping shader program.
+# othrt
+# Location of the coords attribute variable in the standard texture mappping shader program.
+CoordsLoc = None
 NormalLoc = None
 TexCoordLoc = None
 
-ProjectionLoc = None     # Location of the uniform variables in the standard texture mappping shader program.
+# Location of the uniform variables in the standard texture mappping shader program.
+ProjectionLoc = None
 ModelviewLoc = None
 NormalMatrixLoc = None
 
 
-projection = None  #--- projection matrix
+projection = None  # --- projection matrix
 modelview = None   # modelview matrix
-flattenedmodelview = None    #--- flattened modelview matrix
+flattenedmodelview = None  # --- flattened modelview matrix
 
-normalMatrix = mat3()  #--- create a 3X3 matrix that will affect normals
+normalMatrix = mat3()  # --- create a 3X3 matrix that will affect normals
 
 rotator = None   # A SimpleRotator object to enable rotation by mouse dragging.
 
+trirec = None
 sphere = None
 cylinder = None
 box = None
@@ -86,18 +89,18 @@ __pragma__('js', '{}', """\n//This is the main 3D function""")
 def draw():
     global gl, prog, rotator
     global render_D
-    global sphere, cylinder, box, teapot, disk, torus, cone,  \
-            hemisphereinside, hemisphereoutside, thindisk, \
-            quartersphereinside, quartersphereoutside
+    global trirec, sphere, cylinder, box, teapot, disk, torus, cone,  \
+        hemisphereinside, hemisphereoutside, thindisk, \
+        quartersphereinside, quartersphereoutside
     global ambientProduct, diffuseProduct, specularProduct
     global CoordsLoc, NormalLoc, TexCoordLoc, ProjectionLoc, ModelviewLoc, \
-            NormalMatrixLoc, projection, modelview, flattenedmodelview, \
-            normalMatrix, rotator
+        NormalMatrixLoc, projection, modelview, flattenedmodelview, \
+        normalMatrix, rotator
 
     __pragma__('js', '//init')
     gl = init_webgl_inst()
     canvas = document.getElementById("gl-canvas")
-    #clear_canvas(gl)
+    # clear_canvas(gl)
     #prog = select_shaders(gl, "vshader", "fshader")
 
     __pragma__('js', '//LOAD SHADER (standard texture mapping)')
@@ -107,7 +110,7 @@ def draw():
 
     gl.useProgram(prog)
 
-     # locate variables for further use
+    # locate variables for further use
     CoordsLoc = gl.getAttribLocation(prog, "vcoords")
     NormalLoc = gl.getAttribLocation(prog, "vnormal")
     TexCoordLoc = gl.getAttribLocation(prog, "vtexcoord")
@@ -118,8 +121,8 @@ def draw():
 
     gl.enableVertexAttribArray(CoordsLoc)
     gl.enableVertexAttribArray(NormalLoc)
-    gl.disableVertexAttribArray(TexCoordLoc)  # we do not need texture coordinates
-
+    # we do not need texture coordinates
+    gl.disableVertexAttribArray(TexCoordLoc)
 
     #  create a "rotator" monitoring mouse mouvement
     rotator = __new__(SimpleRotator(canvas, render))
@@ -130,27 +133,33 @@ def draw():
     ambientProduct = mult(lightAmbient, materialAmbient)
     diffuseProduct = mult(lightDiffuse, materialDiffuse)
     specularProduct = mult(lightSpecular, materialSpecular)
-    
-    gl.uniform4fv(gl.getUniformLocation(prog, "ambientProduct"), flatten(ambientProduct))
-    gl.uniform4fv(gl.getUniformLocation(prog, "diffuseProduct"), flatten(diffuseProduct))
-    gl.uniform4fv(gl.getUniformLocation(prog, "specularProduct"), flatten(specularProduct))
+
+    gl.uniform4fv(gl.getUniformLocation(
+        prog, "ambientProduct"), flatten(ambientProduct))
+    gl.uniform4fv(gl.getUniformLocation(
+        prog, "diffuseProduct"), flatten(diffuseProduct))
+    gl.uniform4fv(gl.getUniformLocation(
+        prog, "specularProduct"), flatten(specularProduct))
     gl.uniform1f(gl.getUniformLocation(prog, "shininess"), materialShininess)
 
-    gl.uniform4fv(gl.getUniformLocation(prog, "lightPosition"), flatten(lightPosition))
+    gl.uniform4fv(gl.getUniformLocation(
+        prog, "lightPosition"), flatten(lightPosition))
 
     projection = perspective(70.0, 1.0, 1.0, 200.0)
-    gl.uniformMatrix4fv(ProjectionLoc, False, flatten(projection))  # send projection matrix to the shader program
-    
+    # send projection matrix to the shader program
+    gl.uniformMatrix4fv(ProjectionLoc, False, flatten(projection))
+
     # In the following lines, we create different "elements" (sphere, cylinder, box, disk,...).
     # These elements are "objects" returned by the "createModel()" function.
     # The "createModel()" function requires one parameter which contains all the information needed
     # to create the "object". The functions "uvSphere()", "uvCylinder()", "cube()",... are described
-    # in the file "basic-objects-IFS.js". They return an "object" containing vertices, normals, 
+    # in the file "basic-objects-IFS.js". They return an "object" containing vertices, normals,
     # texture coordinates and indices.
-    # 
-    
+    #
+
     sphere = createModel(uvSphere(10.0, 25.0, 25.0))
     cylinder = createModel(uvCylinder(10.0, 20.0, 25.0, False, False))
+    trirec = createModel(triangle_rectangle(10.0))
     # box = createModel(cube(10.0))
 
     # teapot = createModel(teapotModel)
@@ -177,97 +186,108 @@ def draw():
     };
     """)
 
-
     render()
 
-def draw_cylinder():
-    pass
-
-def draw_sphere():
-    pass
 
 def render():
     global flattenedmodelview, modelview, normalMatrix
     gl.clearColor(0.79, 0.76, 0.27, 1)
     clear_canvas(gl)
 
-    __pragma__('js', '{}', '//--- Get the rotation matrix obtained by the displacement of the mouse')
-    __pragma__('js', '{}', '//---  (note: the matrix obtained is already "flattened" by the function getViewMatrix)')
     flattenedmodelview = rotator.getViewMatrix()
     modelview = unflatten(flattenedmodelview)
 
     normalMatrix = extractNormalMatrix(modelview)
-		
+
     initialmodelview = modelview
 
-    __pragma__('js', '{}', '//  now, draw sphere model')
     modelview = initialmodelview
-    __pragma__('js', '{}', '// always extract the normal matrix before scaling')
-    normalMatrix = extractNormalMatrix(modelview)  
-    modelview = mult(modelview, scale(0.5, 0.5, 0.5))
-    sphere.render()
+    normalMatrix = extractNormalMatrix(modelview)
+    modelview = mult(modelview, scale(2, 1, 1))
+    trirec.render()
 
-    __pragma__('js', '{}', '//position matrix')
-    cumul_trans = translate(0.0, 0.0, 0.0)
-    
-    __pragma__('js', '{}', '//Cylinder fixed dimensions')
-    scale_factor = 0.5
-    scalex = 0.2
-    scaley = 0.2
-    scalez = 1
-    cy_heigth = 20.0 * scalez
-    trans = cy_heigth/2
+# def render():
+#     global flattenedmodelview, modelview, normalMatrix
+#     gl.clearColor(0.79, 0.76, 0.27, 1)
+#     clear_canvas(gl)
 
-    directions = [
-        vec3(1,0,0),
-        vec3(0,1,0),
-        vec3(0,0,1),
-        vec3(-1,0,0),
-        vec3(0,-1,0),
-        vec3(0,0,-1),
-    ]
+#     __pragma__('js', '{}', '//--- Get the rotation matrix obtained by the displacement of the mouse')
+#     __pragma__('js', '{}', '//---  (note: the matrix obtained is already "flattened" by the function getViewMatrix)')
+#     flattenedmodelview = rotator.getViewMatrix()
+#     modelview = unflatten(flattenedmodelview)
 
-    next_directions = directions
+#     normalMatrix = extractNormalMatrix(modelview)
 
-    def render_loop():
-        global modelview, normalMatrix, next_directions, cumul_trans, prev_direction
-        index = Math.floor(Math.random() * Math.floor(len(next_directions)))
-        #//random directions
-        direction = normalize(next_directions[index])# //vec3(Math.random(), Math.random(), Math.random())
-        next_directions = [i for i in directions if i != directions[index-3]]
-        rotate_mat = None
-        if direction[0]:
-            rotate_mat = rotate(90.0, 0.0, direction[0], 0.0)
-        elif direction[1]:
-            rotate_mat = rotate(90.0, direction[1], 0.0, 0.0)
+#     initialmodelview = modelview
 
-        deplacement = mult(direction, vec3(trans,trans,trans))
-        cumul_trans = mult(cumul_trans, translate(deplacement))
+#     __pragma__('js', '{}', '//  now, draw sphere model')
+#     modelview = initialmodelview
+#     __pragma__('js', '{}', '// always extract the normal matrix before scaling')
+#     normalMatrix = extractNormalMatrix(modelview)
+#     modelview = mult(modelview, scale(0.5, 0.5, 0.5))
+#     sphere.render()
+
+#     __pragma__('js', '{}', '//position matrix')
+#     cumul_trans = translate(0.0, 0.0, 0.0)
+
+#     __pragma__('js', '{}', '//Cylinder fixed dimensions')
+#     scale_factor = 0.5
+#     scalex = 0.2
+#     scaley = 0.2
+#     scalez = 1
+#     cy_heigth = 20.0 * scalez
+#     trans = cy_heigth/2
+#     __pragma__('js', '{}', '//list of possible directions')
+#     directions = [
+#         vec3(1,0,0),
+#         vec3(0,1,0),
+#         vec3(0,0,1),
+#         vec3(-1,0,0),
+#         vec3(0,-1,0),
+#         vec3(0,0,-1),
+#     ]
+
+#     next_directions = directions
+
+#     def render_loop():
+#         global modelview, normalMatrix, next_directions, cumul_trans
+#         index = Math.floor(Math.random() * Math.floor(len(next_directions)))
+#         #//random directions
+#         direction = normalize(next_directions[index])# //vec3(Math.random(), Math.random(), Math.random())
+#         __pragma__('js', '{}', '//to prevent going backwards')
+#         next_directions = [i for i in directions if not equal(i, negate(direction))]
+#         rotate_mat = None
+#         if direction[0]:
+#             rotate_mat = rotate(90.0, 0.0, direction[0], 0.0)
+#         elif direction[1]:
+#             rotate_mat = rotate(90.0, direction[1], 0.0, 0.0)
+
+#         deplacement = mult(direction, vec3(trans,trans,trans))
+#         cumul_trans = mult(cumul_trans, translate(deplacement))
 
 
-       # //  now, draw cylinder model
-        modelview = initialmodelview
-        modelview = mult(modelview, cumul_trans)
-        if rotate_mat:
-            modelview = mult(modelview, rotate_mat)
-        normalMatrix = extractNormalMatrix(modelview)  #// always extract the normal matrix before scaling
-        modelview = mult(modelview, scale(scalex, scaley, scalez))
-        cylinder.render()
+#         __pragma__('js', '{}', '//  now, draw cylinder model')
+#         modelview = initialmodelview
+#         modelview = mult(modelview, cumul_trans)
+#         if rotate_mat:
+#             modelview = mult(modelview, rotate_mat)
+#         normalMatrix = extractNormalMatrix(modelview)  #// always extract the normal matrix before scaling
+#         modelview = mult(modelview, scale(scalex, scaley, scalez))
+#         cylinder.render()
 
-        deplacement = mult(direction, vec3(trans,trans,trans))
-        cumul_trans = mult(cumul_trans, translate(deplacement))
+#         deplacement = mult(direction, vec3(trans,trans,trans))
+#         cumul_trans = mult(cumul_trans, translate(deplacement))
 
-       # if not prev_direction == direction:
-        #//  now, draw sphere model
-        modelview = initialmodelview
-        modelview = mult(modelview, cumul_trans)
-        normalMatrix = extractNormalMatrix(modelview)  #// always extract the normal matrix before scaling
-        modelview = mult(modelview, scale(0.5, 0.5, 0.5))
-        sphere.render()
+#         __pragma__('js', '{}', '//  now, draw sphere model')
+#         modelview = initialmodelview
+#         modelview = mult(modelview, cumul_trans)
+#         normalMatrix = extractNormalMatrix(modelview)  #// always extract the normal matrix before scaling
+#         modelview = mult(modelview, scale(0.5, 0.5, 0.5))
+#         sphere.render()
 
-    setInterval(render_loop, 300)
-    
-    
+#     __pragma__('js', '{}', '//doesnt work well, erases previous renders. A for loop doenst have this problem')
+#     setInterval(render_loop, 300)
+
 
 __pragma__('js', '{}', """
 
@@ -467,7 +487,6 @@ __pragma__('js', """\n//rx, ry, rz, rotation matrix """)
 #     mat_result = mult(mat_result, rz)
 
 #     return mat_result
-    
 
 
 def old_render(mode, vertices):
@@ -495,4 +514,3 @@ def js_list(iterable):
         return [js_list(i) for i in iterable]  # __:opov
     else:
         return iterable
-

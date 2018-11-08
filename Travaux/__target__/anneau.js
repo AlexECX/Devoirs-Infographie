@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-10-31 22:28:13
+// Transcrypt'ed from Python, 2018-11-06 18:49:24
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Vector3D, Vector4D} from './py_vector.js';
 import {clear_canvas, init_webgl_inst, select_shaders, webgl_render} from './webgl_utils.js';
@@ -25,6 +25,7 @@ export var modelview = null;
 export var flattenedmodelview = null;
 export var normalMatrix = mat3 ();
 export var rotator = null;
+export var trirec = null;
 export var sphere = null;
 export var cylinder = null;
 export var box = null;
@@ -84,79 +85,32 @@ export var draw = function () {
 	gl.uniformMatrix4fv (ProjectionLoc, false, flatten (projection));
 	sphere = createModel (uvSphere (10.0, 25.0, 25.0));
 	cylinder = createModel (uvCylinder (10.0, 20.0, 25.0, false, false));
+	trirec = createModel (triangle_rectangle (10.0));
 	render ();
-};
-export var draw_cylinder = function () {
-	// pass;
-};
-export var draw_sphere = function () {
-	// pass;
 };
 export var render = function () {
 	gl.clearColor (0.79, 0.76, 0.27, 1);
 	clear_canvas (gl);
-	//--- Get the rotation matrix obtained by the displacement of the mouse
-	//---  (note: the matrix obtained is already "flattened" by the function getViewMatrix)
 	flattenedmodelview = rotator.getViewMatrix ();
 	modelview = unflatten (flattenedmodelview);
 	normalMatrix = extractNormalMatrix (modelview);
 	var initialmodelview = modelview;
-	//  now, draw sphere model
 	modelview = initialmodelview;
-	// always extract the normal matrix before scaling
 	normalMatrix = extractNormalMatrix (modelview);
-	modelview = mult (modelview, scale (0.5, 0.5, 0.5));
-	sphere.render ();
-	//position matrix
-	var cumul_trans = translate (0.0, 0.0, 0.0);
-	//Cylinder fixed dimensions
-	var scale_factor = 0.5;
-	var scalex = 0.2;
-	var scaley = 0.2;
-	var scalez = 1;
-	var cy_heigth = 20.0 * scalez;
-	var trans = cy_heigth / 2;
-	var directions = list ([vec3 (1, 0, 0), vec3 (0, 1, 0), vec3 (0, 0, 1), vec3 (-(1), 0, 0), vec3 (0, -(1), 0), vec3 (0, 0, -(1))]);
-	var next_directions = directions;
-	var render_loop = function () {
-		var index = Math.floor (Math.random () * Math.floor (len (next_directions)));
-		var direction = normalize (next_directions [index]);
-		next_directions = (function () {
-			var __accu0__ = [];
-			for (var i of directions) {
-				if (i != directions [index - 3]) {
-					__accu0__.append (i);
-				}
-			}
-			return __accu0__;
-		}) ();
-		var rotate_mat = null;
-		if (direction [0]) {
-			var rotate_mat = rotate (90.0, 0.0, direction [0], 0.0);
-		}
-		else if (direction [1]) {
-			var rotate_mat = rotate (90.0, direction [1], 0.0, 0.0);
-		}
-		var deplacement = mult (direction, vec3 (trans, trans, trans));
-		cumul_trans = mult (cumul_trans, translate (deplacement));
-		modelview = initialmodelview;
-		modelview = mult (modelview, cumul_trans);
-		if (rotate_mat) {
-			modelview = mult (modelview, rotate_mat);
-		}
-		normalMatrix = extractNormalMatrix (modelview);
-		modelview = mult (modelview, scale (scalex, scaley, scalez));
-		cylinder.render ();
-		var deplacement = mult (direction, vec3 (trans, trans, trans));
-		cumul_trans = mult (cumul_trans, translate (deplacement));
-		modelview = initialmodelview;
-		modelview = mult (modelview, cumul_trans);
-		normalMatrix = extractNormalMatrix (modelview);
-		modelview = mult (modelview, scale (0.5, 0.5, 0.5));
-		sphere.render ();
-	};
-	setInterval (render_loop, 300);
+	modelview = mult (modelview, scale (2, 1, 1));
+	trirec.render ();
 };
+//--- Get the rotation matrix obtained by the displacement of the mouse
+//---  (note: the matrix obtained is already "flattened" by the function getViewMatrix)
+//  now, draw sphere model
+// always extract the normal matrix before scaling
+//position matrix
+//Cylinder fixed dimensions
+//list of possible directions
+//to prevent going backwards
+//  now, draw cylinder model
+//  now, draw sphere model
+//doesnt work well, erases previous renders. A for loop doenst have this problem
 
 
 function unflatten(matrix) {
@@ -346,7 +300,10 @@ export var js_list = function (iterable) {
 			var __iterable0__ = iterable;
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var i = __getitem__ (__iterable0__, __index0__);
-				__call__ (__accu0__.append, __accu0__, __call__ (js_list, null, i));
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __call__ (js_list, null, i));
+				}) ();
 			}
 			return __accu0__;
 		}) ();

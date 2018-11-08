@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!-- saved from url=(0190)http://www.uqac.ca/daudet/Cours/Infographie/DOCUMENTS/repertoire435/DOCUMENTS-MULTIMEDIA-COMPLETS/Interactive-Computer-Graphics-7ed/SOURCES/Source%20Code/angelChap6/shadedCube-corrected.html -->
+<html class="gr__uqac_ca"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"></head><body data-gr-c-s-loaded="true"><button id="ButtonX">Rotate X</button>
+<button id="ButtonY">Rotate Y</button>
+<button id="ButtonZ">Rotate Z</button>
+<button id="ButtonT">Toggle Rotation</button>
+
+<p>LIGHT POSITION</p>
+<p>
+</p><div>
+X: min=-3<input id="XSlider" type="range" min="-3" max="3" step="0.1" value="3">
+ max=3
+</div>
+<div>
+Y: min=-3<input id="YSlider" type="range" min="-3" max="3" step="0.1" value="3">
+ max=3
+</div>
+<div>
+Z: min=-3<input id="ZSlider" type="range" min="-3" max="3" step="0.1" value="3">
+ max=3
+</div>
+<p></p>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute  vec4 vPosition;
+attribute  vec3 vNormal;
+varying vec4 fColor;
+
+uniform vec4 ambientProduct, diffuseProduct, specularProduct;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 lightPosition;
+uniform float shininess;
+void main()
+{
+
+    
+    vec3 pos = (modelViewMatrix * vPosition).xyz;
+    vec3 light = lightPosition.xyz;
+    vec3 l = normalize( light - pos );
+
+	
+    vec3 v = normalize( -pos );
+    vec3 h = normalize( l + v );
+    
+    vec4 NN = vec4(vNormal,0);
+
+    // Transform vertex normal into eye coordinates
+       
+    vec3 n = normalize( (modelViewMatrix*NN).xyz);
+
+    // Compute terms in the illumination equation
+    vec4 ambient = ambientProduct;
+
+    float factorLN = max( dot(l, n), 0.0 );
+    vec4  diffuse = factorLN*diffuseProduct;
+
+    float factorNH = pow( max(dot(n, h), 0.0), shininess );
+    vec4  specular = factorNH * specularProduct;
+    
+    if( dot(l, n) < 0.0 ) {
+	specular = vec4(0.0, 0.0, 0.0, 1.0);
+    } 
+
+    gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+    fColor = ambient + diffuse +specular;
+    
+    fColor.a = 1.0;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+#ifdef GL_ES
+precision highp float;
+#endif
+
+
+varying vec4 fColor;
+
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="shadedCube-corrected.js"></script>
+
+
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+
+</body></html>
