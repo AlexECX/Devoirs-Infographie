@@ -202,7 +202,7 @@ def render():
     normalMatrix = extractNormalMatrix(modelview)
 
     wing.traverse()
-    #trirec.render()
+    # trirec.render()
 
     modelview = initialModelView
 
@@ -378,7 +378,7 @@ function resize(canvas) {  // ref. https://webglfundamentals.org/webgl/lessons/w
 
 
 class Node:
-    
+
     def __init__(self, transform=None, render=None, sibling=None, child=None):
         self.transform = transform
         self.render = render
@@ -386,9 +386,8 @@ class Node:
         self.child = child
 
 
-
 class Wing:
-    
+
     figure = []
     points_list = []
     stack = []
@@ -397,41 +396,53 @@ class Wing:
 
     def __init__(self):
         global gl
-        
+
         m = mat4()
         #m = mult(m, translate(5,0,0))
         #m = mult(m, rotate(20.0, 0,0,1))
 
-        self.points_list.append(createModel(cube(20.0)))
-        self.figure.append(Node(m, self.render, None, 1))
+        self.points_list.append(createModel(cube(10.0)))
+        self.figure.append(Node(m, self.render))
 
-        self.points_list.append(createModel(cube(5.0)))
-        #m = mult(m, translate(20.0-5.0, 0, -20.0))
-        self.figure.append(Node(m, self.render2))
-
+        # self.points_list.append(createModel(cube(5.0)))
+        # #m = mult(m, translate(20.0-5.0, 0, -20.0))
+        # self.figure.append(Node(m, self.render2))
 
     def render(self):
         global modelview, normalMatrix
-        return
 
+        initialModelView = modelview
         normalMatrix = extractNormalMatrix(modelview)
-        instanceMatrix = mult(self.modelViewMatrix, scale(1, 0.25, 1))
+        instanceMatrix = mult(self.modelViewMatrix, scale(2, 0.25, 2))
         modelview = mult(modelview, instanceMatrix)
         self.points_list[0].render()
+        modelview = initialModelView
 
-    def render2(self):
-        global modelview, normalMatrix
-
-        normalMatrix = extractNormalMatrix(modelview)
-        instanceMatrix = mult(self.modelViewMatrix, scale(1, 0.5, 5.0))
+        initialModelView = modelview
+        instanceMatrix = mult(mat4(), translate(0, 0, -25/2))
         modelview = mult(modelview, instanceMatrix)
-        self.points_list[1].render()
+        normalMatrix = extractNormalMatrix(modelview)
+        instanceMatrix = mult(instanceMatrix, scale(0.5, 0.25, 3))
+        modelview = mult(modelview, instanceMatrix)
+        self.points_list[0].render()
+        modelview = initialModelView
 
+    # def render2(self):
+    #     global modelview, normalMatrix
+
+    #     normalMatrix = extractNormalMatrix(modelview)
+    #     instanceMatrix = mult(self.modelViewMatrix, scale(1, 0.5, 5.0))
+    #     initialModelView = modelview
+    #     modelview = mult(modelview, instanceMatrix)
+    #     modelview = initialModelView
+    #     self.points_list[1].render()
 
     def traverse(self, id=0):
-        
+        global modelview
+
         self.stack.push(self.modelViewMatrix)
-        self.modelViewMatrix = mult(self.modelViewMatrix, self.figure[id].transform)
+        self.modelViewMatrix = mult(
+            self.modelViewMatrix, self.figure[id].transform)
         self.figure[id].render()
         if self.figure[id].child != None:
             self.traverse(self.figure[id].child)
@@ -439,8 +450,6 @@ class Wing:
         self.modelViewMatrix = self.stack.pop()
         if self.figure[id].sibling != None:
             self.traverse(self.figure[id].sibling)
-
-
 
 
 __pragma__('js', '{}', """

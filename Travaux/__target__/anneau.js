@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-11-08 17:46:44
+// Transcrypt'ed from Python, 2018-11-08 21:31:04
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Vector3D, Vector4D} from './py_vector.js';
 import {clear_canvas, init_webgl_inst, select_shaders, webgl_render} from './webgl_utils.js';
@@ -295,23 +295,24 @@ export var Wing =  __class__ ('Wing', [object], {
 	modelViewMatrix: mat4 (),
 	get __init__ () {return __get__ (this, function (self) {
 		var m = mat4 ();
-		self.points_list.append (createModel (cube (20.0)));
-		self.figure.append (Node (m, self.render, null, 1));
-		self.points_list.append (createModel (cube (5.0)));
-		self.figure.append (Node (m, self.render2));
+		self.points_list.append (createModel (cube (10.0)));
+		self.figure.append (Node (m, self.render));
 	});},
 	get render () {return __get__ (this, function (self) {
-		return ;
+		var initialModelView = modelview;
 		normalMatrix = extractNormalMatrix (modelview);
-		var instanceMatrix = mult (self.modelViewMatrix, scale (1, 0.25, 1));
+		var instanceMatrix = mult (self.modelViewMatrix, scale (2, 0.25, 2));
 		modelview = mult (modelview, instanceMatrix);
 		self.points_list [0].render ();
-	});},
-	get render2 () {return __get__ (this, function (self) {
-		normalMatrix = extractNormalMatrix (modelview);
-		var instanceMatrix = mult (self.modelViewMatrix, scale (1, 0.5, 5.0));
+		modelview = initialModelView;
+		var initialModelView = modelview;
+		var instanceMatrix = mult (mat4 (), translate (0, 0, -(25) / 2 - 1));
 		modelview = mult (modelview, instanceMatrix);
-		self.points_list [1].render ();
+		normalMatrix = extractNormalMatrix (modelview);
+		var instanceMatrix = mult (instanceMatrix, scale (0.5, 0.25, 3));
+		modelview = mult (modelview, instanceMatrix);
+		self.points_list [0].render ();
+		modelview = initialModelView;
 	});},
 	get traverse () {return __get__ (this, function (self, id) {
 		if (typeof id == 'undefined' || (id != null && id.hasOwnProperty ("__kwargtrans__"))) {;
