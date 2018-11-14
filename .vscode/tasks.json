@@ -34,6 +34,18 @@
             "problemMatcher": []
         },
         {
+            "label": "Transcrypt Build main",
+            "type": "shell",
+            "command": "transcrypt",
+            "args": [
+                "-b",
+                "-n",
+                //"-m",
+                "${workspaceFolder}/Travaux/anneau"
+            ],
+            "problemMatcher": []
+        },
+        {
             "label": "Start python server",
             "type": "shell",
             "command": "./start_python_server",
