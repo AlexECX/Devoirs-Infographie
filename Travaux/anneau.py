@@ -163,7 +163,7 @@ def draw():
     # cylinder = createModel(uvCylinder(10.0, 20.0, 25.0, False, False))
     trirec = createModel(triangle_rectangle(10.0))
     spaceship = SpaceShip()
-    # box = createModel(cube(10.0))
+    box = createModel(quad(10.0, 5.0, 2.0))
 
     # teapot = createModel(teapotModel)
     # disk = createModel(ring(5.0, 10.0, 25.0))
@@ -203,6 +203,8 @@ def render():
     normalMatrix = extractNormalMatrix(modelview)
 
     spaceship.render()
+    # modelview = mult(modelview, scale(2,1,1))
+    # box.render()
     # trirec.render()
 
     modelview = initialModelView
