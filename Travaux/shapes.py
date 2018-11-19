@@ -25,6 +25,7 @@ class Transform:
         self.multi = kwargs.get("multi", mat4())
     __pragma__('nokwargs')
 
+
     def scale_factor(self):
         __pragma__('js', 'var obj = {{}}')
         obj.x = self.scale[0][0]
@@ -70,7 +71,7 @@ class Figure:
         self.transform = Transform()
         
 
-    def generic_shape(self, shapeList_index):
+    def generic_shape(self, shape_object):
         __pragma__('js', """//Fonction render de base pour à peu près tous les noeuds""")
     
         global modelview, normalMatrix
@@ -82,7 +83,7 @@ class Figure:
         instanceMatrix = mult(self.transform.multi, scaleSafeMatrix)
         instanceMatrix = mult(instanceMatrix, self.transform.scale)
         modelview = mult(modelview, instanceMatrix)
-        self.shapeList[shapeList_index].render()
+        shape_object.render()
         modelview = initialModelView
 
     
@@ -172,20 +173,19 @@ class Wing(Figure):
         size = 10.0
         cy_heigth = 20.0
         ID = 0
-        generic_shape = self.generic_shape
         self.shapeList.append(createModel(cube(size)))
         self.shapeList.append(createModel(uvCylinder(10.0, cy_heigth, 25.0, False, False)))
         self.shapeList.append(createModel(tetrahedre(10.0)))
         #self.shapeList.append(Reactor())
 
         def rectangle():
-            generic_shape(0)
+            self.generic_shape(self.shapeList[0])
 
         def cylinder():
-            generic_shape(1)
+            self.generic_shape(self.shapeList[1])
 
         def tetra():
-            generic_shape(2)
+            self.generic_shape(self.shapeList[2])
 
         __pragma__('js', '//#start wing construct')
         
@@ -232,28 +232,22 @@ class Wing(Figure):
 
         __pragma__('js', '//#cannon 1/3')
         
-        p_sc = m.scale_factor()
         m = Transform(scale=scale(.75, .80, 2/3))
-        sc = m.scale_factor()
-        m.translate = translate(5+5*sc.x, 0, -3)
+        m.translate = translate(5+5*.75, 0, -3)
         self.figure.append(Node(m, rectangle, None, ID + 1))
         ID += 1
 
         __pragma__('js', '//#cannon 2/3')
-        p_sc = sc
         
         m = Transform(scale=scale(.80,.60,.50))
-        sc = m.scale_factor()
-        m.translate = translate(0, 0, size*p_sc.z + size*sc.z)
+        m.translate = translate(0, 0, size*2/3 + size*.50)
         self.figure.append(Node(m, rectangle, None, ID + 1))
         ID += 1
 
         __pragma__('js', '//#cannon 3/3')
-        p_sc = sc
         
         m = Transform(scale=scale(.15, 3/4*.50, .30))
-        sc = m.scale_factor()
-        m.translate = translate(0, 0, size*p_sc.x/2 + cy_heigth*sc.z/2)
+        m.translate = translate(0, 0, size*.80/2 + cy_heigth*.30/2)
         self.figure.append(Node(m, cylinder, None, None))
 
 __pragma__('js', """/**
@@ -269,7 +263,6 @@ class CenterPiece(Figure):
         cy_heigth = 5.0
         cy_r = 10.0
         ID = 0
-        generic_shape = self.generic_shape
         self.shapeList.append(createModel(cube(size)))
         self.shapeList.append(createModel(uvCylinder(cy_r, cy_heigth, 22.0, False, False)))
         self.shapeList.append(createModel(uvCylinder(cy_r, cy_heigth, 6.0, False, False)))
@@ -277,69 +270,56 @@ class CenterPiece(Figure):
         self.shapeList.append(FrontCannon())
 
         def rectangle():
-            generic_shape(0)
+            self.generic_shape(self.shapeList[0])
 
         def cylinder():
-            generic_shape(1)
+            self.generic_shape(self.shapeList[1])
 
         def cylinder6slice():
-            generic_shape(2)
+            self.generic_shape(self.shapeList[2])
 
         def tri_rect():
-            generic_shape(3)
+            self.generic_shape(self.shapeList[3])
 
-
-        transfo = Transform(scale=scale(.5,1,3))
         
-        m = transfo
+        m = Transform(scale=scale(.5,1,3))
         self.figure.append(Node(m, rectangle, None, ID +1))
         ID += 1
 
         __pragma__('js', """
 //#mainframe cockpit start""")
-        sc = transfo.scale_factor()
-        transfo = Transform(
+        m = Transform(
+            translate=translate(0,0,size*3/2),
             rotate=rotate(90.0, 0,1,0), 
-            scale=mult(scale(1, .5, 1), mat4invert(transfo.scale))
+            scale=mult(scale(1, .5, 1), mat4invert(m.scale))
         )
-        
-        transfo.translate = translate(0,0,size*sc.z/2)
-        m = transfo
         self.figure.append(Node(m, cylinder, None, ID + 1))
         ID += 1
 
-        sc = transfo.scale_factor()
-        transfo = Transform(
+        m = Transform(
             rotate=rotate(50.0, 0,0,1),
             scale=scale(.8,1,1),
             translate=translate(0,-cy_r*1/2*.45,cy_r*1/2*1.15)
         )
-        
-        m = transfo
         self.figure.append(Node(m, cylinder, None, ID + 1))
         ID += 1
 
-        sc = transfo.scale_factor()
-        transfo = Transform(
+        m = Transform(
             rotate=rotate(20.0, 0,0,1),
             translate=translate(0,-cy_r*1/4,cy_r*1/4)
         )
-        
-        m = transfo
         self.figure.append(Node(m, cylinder, None, ID + 1))
         ID += 1
 
         __pragma__('js', """//#mainframe cockpit end
         """)
 
-        sc = transfo.scale_factor()
-        transfo = Transform(
+        __pragma__('js', '{}', """//#reactor""")
+        m = Transform(
             rotate=rotate(-80.0, 0,0,1),
             scale=scale(.5, .5, 1),
             translate=translate(0, -cy_heigth*1.1, cy_heigth*.80)
         )
-        
-        m = transfo
         self.figure.append(Node(m, cylinder, ID + 1, None))
         ID += 1
 
@@ -354,7 +334,6 @@ class CenterPiece(Figure):
             scale=mult(scale(.5,.5, .5), mat4invert(scale(.8,.5,1))),
             rotate=mat4invert(mult(rotate(90.0, 0,1,0), rotate(70, 0,0,1)))
         )
-        
         self.figure.append(Node(m, canon_right, ID + 1, None))
         ID += 1
 
@@ -365,11 +344,8 @@ class CenterPiece(Figure):
             surface.transform.translate = scale(-1,1,1)
             surface.traverse()
             
-            
-
         m = m.__copy__()
         m.translate = translate(-(cy_heigth/2+cy_heigth/4),-cy_heigth,0)
-        
         self.figure.append(Node(m, canon_left, None, None))
       
 __pragma__('js', """/**
@@ -385,63 +361,50 @@ class FrontCannon(Figure):
         cy_heigth = 2.5
         cy_r = 5.0
         ID = 0
-        generic_shape = self.generic_shape
         self.shapeList.append(createModel(uvCylinder(cy_r, cy_heigth, 6.0, False, False)))
         self.shapeList.append(createModel(uvCylinder(cy_r, cy_heigth, 25.0, False, False)))
         self.shapeList.append(createModel(quad(size, size, size/2)))
 
         def cylinder6slice():
-            generic_shape(0)
+            self.generic_shape(self.shapeList[0])
 
         def cylinder():
-            generic_shape(1)
+            self.generic_shape(self.shapeList[1])
 
         def tri_rect():
-            generic_shape(2)
+            self.generic_shape(self.shapeList[2])
 
-        transfo = Transform(
+        m = Transform(
             rotate=rotate(30.0, 0,0,1),
             scale=scale(1,1,5)
         )
-        
-        m = transfo
         self.figure.append(Node(m, cylinder6slice, None, ID + 1))
         p_ID = ID
         ID += 1
 
-        
-
-        sc = transfo.scale_factor()
-        transfo = Transform(
+        m = Transform(
             scale=scale(1/3, 1/3, 1+6/5),
             translate=translate(0,0, cy_heigth*6)
             )   
-            
-        m = transfo
         self.figure.append(Node(m, cylinder, None, ID + 1))
         
         ID += 1
 
-        transfo = Transform(
+        m = Transform(
             scale=scale(1.2, 1.2, 1/6),
             translate=translate(0,0, -cy_heigth*3)
             )
-            
-        m = transfo
         self.figure.append(Node(m, cylinder, None, None))
         ID += 1
 
         self.figure[p_ID].sibling = ID
         ID += 1
 
-        sc = sc
-        transfo = Transform(
+        m = Transform(
             rotate=mult(rotate(180.0 , 0,0,1), rotate(-90.0, 0,1,0)),
             scale=scale(3/4*size,1,.5),
             translate=translate(-cy_r/2, cy_r/4, -cy_heigth*5)
         )    
-            
-        m = transfo
         self.figure.append(Node(m, tri_rect, None, None))
         ID += 1
 
@@ -501,7 +464,6 @@ class Reactor(Figure):
             translate=translate(size/2*.90, 0, 0),
             scale=scale(.10,1,1)
         )
-        self.preTransformList.append(transfo)
         self.figure.append(Node(m, sides, ID + 1, None))
         ID += 1
 

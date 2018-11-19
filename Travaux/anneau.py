@@ -161,7 +161,7 @@ def draw():
     # cylinder = createModel(uvCylinder(10.0, 20.0, 25.0, False, False))
     #trirec = createModel(triangle_rectangle(10.0))
     spaceship = SpaceShip()
-    #box = createModel(tetrahedre(10.0))
+    box = createModel(empty_cube(10.0, 2.0))
 
     # teapot = createModel(teapotModel)
     # disk = createModel(ring(5.0, 10.0, 25.0))
@@ -198,13 +198,15 @@ def render():
     flattenedmodelview = rotator.getViewMatrix()
     modelview = unflatten(flattenedmodelview)
     initialModelView = modelview
-
+    # normalMatrix = extractNormalMatrix(modelview)
+    # modelview = mult(modelview, scale(1, 4, .5))
+    # box.render()
     spaceship.transform = Transform()
     spaceship.transform.multi = scale(.25,.25,.25)
     spaceship.traverse()
+    
 
     modelview = initialModelView
-
 
 
 __pragma__('js', '{}', """

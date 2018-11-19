@@ -150,6 +150,57 @@ function triangle_rectangle(side) {
   * has a lot of redundancy.)
   * @side the length of a side of the cube.  If not given, the value will be 1.
   */
+function empty_cube(side, thickness, depth) {
+   var s = (side || 1)/2;
+   var d = s;
+   var t = thickness || s/2
+   var coords = [];
+   var normals = [];
+   var texCoords = [];
+   var indices = [];
+   function face(xyz, nrm) {
+      var start = coords.length/3;
+      var i;
+      for (i = 0; i < 12; i++) {
+         coords.push(xyz[i]);
+      }
+      for (i = 0; i < 4; i++) {
+         normals.push(nrm[0],nrm[1],nrm[2]);
+      }
+      texCoords.push(0,0,1,0,1,1,0,1);
+      indices.push(start,start+1,start+2,start,start+2,start+3);
+   }
+//    face( [-s,-s,s, s,-s,s, s,s,s, -s,s,s], [0,0,1] );
+//    face( [-s,-s,-s, -s,s,-s, s,s,-s, s,-s,-s], [0,0,-1] );
+   face( [-s,s,-s, -s,s,s, s,s,s, s,s,-s], [0,1,0] );
+   face( [-s,-s,-s, s,-s,-s, s,-s,s, -s,-s,s], [0,-1,0] );
+   face( [s,-s,-s, s,s,-s, s,s,s, s,-s,s], [1,0,0] );
+   face( [-s,-s,-s, -s,-s,s, -s,s,s, -s,s,-s], [-1,0,0] );
+   //joint faces
+   //front
+   face( [-s,-s,s, -s+t,-s,d, -s+t,s,d, -s,s,s], [0,0,1] );
+   face( [s,s,s, s-t,s,d, s-t,-s,d, s,-s,s], [0,0,1] );
+   face( [-s+t,-s+t,s, -s+t,-s,d, s-t,-s,d, s-t,-s+t,s], [0,0,1] );
+   face( [-s+t,s,s, -s+t,s-t,d, s-t,s-t,d, s-t,s,s], [0,0,1] );
+   //back
+   face( [-s+t,-s,-d, -s+t,s,-d, -s,s,-s, -s,-s,-s, ], [0,0,-1] );
+   face( [s-t,s,-d, s-t,-s,-d, s,-s,-s, s,s,-s], [0,0,-1] );
+   face( [-s+t,-s,-d, s-t,-s,-d, s-t,-s+t,-s, -s+t,-s+t,-s], [0,0,-1] );
+   face( [-s+t,s-t,-d, s-t,s-t,-d, s-t,s,-s, -s+t,s,-s], [0,0,-1] );
+
+   //inside faces
+   s = s - thickness
+   face( [-s,s,-d, -s,s,d, s,s,d, s,s,-d], [0,-1,0] );
+   face( [-s,-s,-d, s,-s,-d, s,-s,d, -s,-s,d], [0,1,0] );
+   face( [s,-s,-d, s,s,-d, s,s,d, s,-s,d], [-1,0,0] );
+   face( [-s,-s,-d, -s,-s,d, -s,s,d, -s,s,-d], [1,0,0] );
+   return {
+      vertexPositions: new Float32Array(coords),
+      vertexNormals: new Float32Array(normals),
+      vertexTextureCoords: new Float32Array(texCoords),
+      indices: new Uint16Array(indices)
+   }
+}
 function cube(side) {
    var s = (side || 1)/2;
    var coords = [];

@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Transcrypt python",
+            "label": "Transcrypt Compile",
             "type": "shell",
             "command": "transcrypt",
             "args": [
@@ -19,7 +19,7 @@
             "problemMatcher": []
         },
         {
-            "label": "Transcrypt Build python",
+            "label": "Transcrypt Build",
             "type": "shell",
             "command": "transcrypt",
             "args": [
@@ -31,6 +31,18 @@
             "options": {
                 "cwd": "${fileDirname}"
             },
+            "problemMatcher": []
+        },
+        {
+            "label": "Transcrypt Compile main",
+            "type": "shell",
+            "command": "transcrypt",
+            "args": [
+                //"-b",
+                "-n",
+                //"-m",
+                "${workspaceFolder}/Travaux/anneau"
+            ],
             "problemMatcher": []
         },
         {

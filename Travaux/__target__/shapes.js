@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-11-18 01:21:57
+// Transcrypt'ed from Python, 2018-11-19 11:42:14
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 var __name__ = 'shapes';
 
@@ -89,7 +89,7 @@ export var Figure =  __class__ ('Figure', [object], {
 		self.stack = list ([]);
 		self.transform = Transform ();
 	});},
-	get generic_shape () {return __get__ (this, function (self, shapeList_index) {
+	get generic_shape () {return __get__ (this, function (self, shape_object) {
 		//Fonction render de base pour à peu près tous les noeuds
 		var initialModelView = modelview;
 		var scaleSafeMatrix = mult (self.transform.translate, self.transform.rotate);
@@ -97,7 +97,7 @@ export var Figure =  __class__ ('Figure', [object], {
 		var instanceMatrix = mult (self.transform.multi, scaleSafeMatrix);
 		var instanceMatrix = mult (instanceMatrix, self.transform.scale);
 		modelview = mult (modelview, instanceMatrix);
-		self.shapeList [shapeList_index].render ();
+		shape_object.render ();
 		modelview = initialModelView;
 	});},
 	get traverse () {return __get__ (this, function (self) {
@@ -165,18 +165,17 @@ export var Wing =  __class__ ('Wing', [Figure], {
 		var size = 10.0;
 		var cy_heigth = 20.0;
 		var ID = 0;
-		var generic_shape = self.generic_shape;
 		self.shapeList.append (createModel (cube (size)));
 		self.shapeList.append (createModel (uvCylinder (10.0, cy_heigth, 25.0, false, false)));
 		self.shapeList.append (createModel (tetrahedre (10.0)));
 		var rectangle = function () {
-			generic_shape (0);
+			self.generic_shape (self.shapeList [0]);
 		};
 		var cylinder = function () {
-			generic_shape (1);
+			self.generic_shape (self.shapeList [1]);
 		};
 		var tetra = function () {
-			generic_shape (2);
+			self.generic_shape (self.shapeList [2]);
 		};
 		//#start wing construct
 		var m = Transform (__kwargtrans__ ({scale: scale (2, 0.5, 2)}));
@@ -209,24 +208,18 @@ export var Wing =  __class__ ('Wing', [Figure], {
 		self.figure.append (Node (m, cylinder, ID + 1, null));
 		ID++;
 		//#cannon 1/3
-		var p_sc = m.scale_factor ();
 		var m = Transform (__kwargtrans__ ({scale: scale (0.75, 0.8, 2 / 3)}));
-		var sc = m.scale_factor ();
-		m.translate = translate (5 + 5 * sc.x, 0, -(3));
+		m.translate = translate (5 + 5 * 0.75, 0, -(3));
 		self.figure.append (Node (m, rectangle, null, ID + 1));
 		ID++;
 		//#cannon 2/3
-		var p_sc = sc;
 		var m = Transform (__kwargtrans__ ({scale: scale (0.8, 0.6, 0.5)}));
-		var sc = m.scale_factor ();
-		m.translate = translate (0, 0, size * p_sc.z + size * sc.z);
+		m.translate = translate (0, 0, (size * 2) / 3 + size * 0.5);
 		self.figure.append (Node (m, rectangle, null, ID + 1));
 		ID++;
 		//#cannon 3/3
-		var p_sc = sc;
 		var m = Transform (__kwargtrans__ ({scale: scale (0.15, (3 / 4) * 0.5, 0.3)}));
-		var sc = m.scale_factor ();
-		m.translate = translate (0, 0, (size * p_sc.x) / 2 + (cy_heigth * sc.z) / 2);
+		m.translate = translate (0, 0, (size * 0.8) / 2 + (cy_heigth * 0.3) / 2);
 		self.figure.append (Node (m, cylinder, null, null));
 	});}
 });
@@ -242,51 +235,41 @@ export var CenterPiece =  __class__ ('CenterPiece', [Figure], {
 		var cy_heigth = 5.0;
 		var cy_r = 10.0;
 		var ID = 0;
-		var generic_shape = self.generic_shape;
 		self.shapeList.append (createModel (cube (size)));
 		self.shapeList.append (createModel (uvCylinder (cy_r, cy_heigth, 22.0, false, false)));
 		self.shapeList.append (createModel (uvCylinder (cy_r, cy_heigth, 6.0, false, false)));
 		self.shapeList.append (createModel (quad (size, size, size / 2)));
 		self.shapeList.append (FrontCannon ());
 		var rectangle = function () {
-			generic_shape (0);
+			self.generic_shape (self.shapeList [0]);
 		};
 		var cylinder = function () {
-			generic_shape (1);
+			self.generic_shape (self.shapeList [1]);
 		};
 		var cylinder6slice = function () {
-			generic_shape (2);
+			self.generic_shape (self.shapeList [2]);
 		};
 		var tri_rect = function () {
-			generic_shape (3);
+			self.generic_shape (self.shapeList [3]);
 		};
-		var transfo = Transform (__kwargtrans__ ({scale: scale (0.5, 1, 3)}));
-		var m = transfo;
+		var m = Transform (__kwargtrans__ ({scale: scale (0.5, 1, 3)}));
 		self.figure.append (Node (m, rectangle, null, ID + 1));
 		ID++;
 		
 		//#mainframe cockpit start
-		var sc = transfo.scale_factor ();
-		var transfo = Transform (__kwargtrans__ ({rotate: rotate (90.0, 0, 1, 0), scale: mult (scale (1, 0.5, 1), mat4invert (transfo.scale))}));
-		transfo.translate = translate (0, 0, (size * sc.z) / 2);
-		var m = transfo;
+		var m = Transform (__kwargtrans__ ({translate: translate (0, 0, (size * 3) / 2), rotate: rotate (90.0, 0, 1, 0), scale: mult (scale (1, 0.5, 1), mat4invert (m.scale))}));
 		self.figure.append (Node (m, cylinder, null, ID + 1));
 		ID++;
-		var sc = transfo.scale_factor ();
-		var transfo = Transform (__kwargtrans__ ({rotate: rotate (50.0, 0, 0, 1), scale: scale (0.8, 1, 1), translate: translate (0, ((-(cy_r) * 1) / 2) * 0.45, ((cy_r * 1) / 2) * 1.15)}));
-		var m = transfo;
+		var m = Transform (__kwargtrans__ ({rotate: rotate (50.0, 0, 0, 1), scale: scale (0.8, 1, 1), translate: translate (0, ((-(cy_r) * 1) / 2) * 0.45, ((cy_r * 1) / 2) * 1.15)}));
 		self.figure.append (Node (m, cylinder, null, ID + 1));
 		ID++;
-		var sc = transfo.scale_factor ();
-		var transfo = Transform (__kwargtrans__ ({rotate: rotate (20.0, 0, 0, 1), translate: translate (0, (-(cy_r) * 1) / 4, (cy_r * 1) / 4)}));
-		var m = transfo;
+		var m = Transform (__kwargtrans__ ({rotate: rotate (20.0, 0, 0, 1), translate: translate (0, (-(cy_r) * 1) / 4, (cy_r * 1) / 4)}));
 		self.figure.append (Node (m, cylinder, null, ID + 1));
 		ID++;
 		//#mainframe cockpit end
 		        
-		var sc = transfo.scale_factor ();
-		var transfo = Transform (__kwargtrans__ ({rotate: rotate (-(80.0), 0, 0, 1), scale: scale (0.5, 0.5, 1), translate: translate (0, -(cy_heigth) * 1.1, cy_heigth * 0.8)}));
-		var m = transfo;
+		//#reactor
+		var m = Transform (__kwargtrans__ ({rotate: rotate (-(80.0), 0, 0, 1), scale: scale (0.5, 0.5, 1), translate: translate (0, -(cy_heigth) * 1.1, cy_heigth * 0.8)}));
 		self.figure.append (Node (m, cylinder, ID + 1, null));
 		ID++;
 		//#canon
@@ -322,38 +305,31 @@ export var FrontCannon =  __class__ ('FrontCannon', [Figure], {
 		var cy_heigth = 2.5;
 		var cy_r = 5.0;
 		var ID = 0;
-		var generic_shape = self.generic_shape;
 		self.shapeList.append (createModel (uvCylinder (cy_r, cy_heigth, 6.0, false, false)));
 		self.shapeList.append (createModel (uvCylinder (cy_r, cy_heigth, 25.0, false, false)));
 		self.shapeList.append (createModel (quad (size, size, size / 2)));
 		var cylinder6slice = function () {
-			generic_shape (0);
+			self.generic_shape (self.shapeList [0]);
 		};
 		var cylinder = function () {
-			generic_shape (1);
+			self.generic_shape (self.shapeList [1]);
 		};
 		var tri_rect = function () {
-			generic_shape (2);
+			self.generic_shape (self.shapeList [2]);
 		};
-		var transfo = Transform (__kwargtrans__ ({rotate: rotate (30.0, 0, 0, 1), scale: scale (1, 1, 5)}));
-		var m = transfo;
+		var m = Transform (__kwargtrans__ ({rotate: rotate (30.0, 0, 0, 1), scale: scale (1, 1, 5)}));
 		self.figure.append (Node (m, cylinder6slice, null, ID + 1));
 		var p_ID = ID;
 		ID++;
-		var sc = transfo.scale_factor ();
-		var transfo = Transform (__kwargtrans__ ({scale: scale (1 / 3, 1 / 3, 1 + 6 / 5), translate: translate (0, 0, cy_heigth * 6)}));
-		var m = transfo;
+		var m = Transform (__kwargtrans__ ({scale: scale (1 / 3, 1 / 3, 1 + 6 / 5), translate: translate (0, 0, cy_heigth * 6)}));
 		self.figure.append (Node (m, cylinder, null, ID + 1));
 		ID++;
-		var transfo = Transform (__kwargtrans__ ({scale: scale (1.2, 1.2, 1 / 6), translate: translate (0, 0, -(cy_heigth) * 3)}));
-		var m = transfo;
+		var m = Transform (__kwargtrans__ ({scale: scale (1.2, 1.2, 1 / 6), translate: translate (0, 0, -(cy_heigth) * 3)}));
 		self.figure.append (Node (m, cylinder, null, null));
 		ID++;
 		self.figure [p_ID].sibling = ID;
 		ID++;
-		var sc = sc;
-		var transfo = Transform (__kwargtrans__ ({rotate: mult (rotate (180.0, 0, 0, 1), rotate (-(90.0), 0, 1, 0)), scale: scale ((3 / 4) * size, 1, 0.5), translate: translate (-(cy_r) / 2, cy_r / 4, -(cy_heigth) * 5)}));
-		var m = transfo;
+		var m = Transform (__kwargtrans__ ({rotate: mult (rotate (180.0, 0, 0, 1), rotate (-(90.0), 0, 1, 0)), scale: scale ((3 / 4) * size, 1, 0.5), translate: translate (-(cy_r) / 2, cy_r / 4, -(cy_heigth) * 5)}));
 		self.figure.append (Node (m, tri_rect, null, null));
 		ID++;
 	});}
@@ -403,7 +379,6 @@ export var Reactor =  __class__ ('Reactor', [Figure], {
 			self.transform.scale = scale (sc.x, sc.y, sc.z);
 		};
 		var transfo = Transform (__kwargtrans__ ({translate: translate ((size / 2) * 0.9, 0, 0), scale: scale (0.1, 1, 1)}));
-		self.preTransformList.append (transfo);
 		self.figure.append (Node (m, sides, ID + 1, null));
 		ID++;
 		var transfo = Transform (__kwargtrans__ ({translate: translate (-((size / 2) * 0.9), 0, 0), scale: scale (0.1, 1, 1)}));
