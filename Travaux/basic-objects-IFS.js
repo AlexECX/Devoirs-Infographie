@@ -25,7 +25,54 @@
  * This file also defines a variable (not a function) teapotIFS
  * which is s model of the OpenGL teapot in the same format.
  */
+function calculenormale(p1, p2, p3)   // sommets listés selon la règle de la main droite
 
+ {
+     var t1 = subtract(p2, p1);
+     var t2 = subtract(p3, p1);
+     var normal = cross(t1, t2);     // la fonction cross() retourne un vecteur de 3 éléments
+     normal = normalize(normal);
+
+     return (normal); 
+}
+
+function tetrahedre(side) {
+    var s = (side || 1)/2;
+    var coords = [];
+    var normals = [];
+    var texCoords = [];
+    var indices = [];
+    function face(xyz) {
+       var start = coords.length/3;
+       var i;
+       for (i = 0; i < 9; i++) {
+          coords.push(xyz[i]);
+       }
+       nrm = calculenormale(
+           vec3(xyz[0],xyz[1],xyz[2]),
+           vec3(xyz[3],xyz[4],xyz[5]),
+           vec3(xyz[6],xyz[7],xyz[8])
+           )
+       for (i = 0; i < 3; i++) {
+          normals.push(nrm[0],nrm[1],nrm[2]);
+       }
+       texCoords.push(0,0,1,0,1,1,0,1);
+       indices.push(start,start+1,start+2);
+    }
+    // a^2 + b^2 = c^2
+    var height = Math.sqrt(side*side - (s/2)*(s/2))
+    var etoe = Math.sqrt(height*height - (s/2)*(s/2))
+    face( [s,etoe/2,0, -s,etoe/2,0, 0,-etoe/2,s])
+    face( [s,etoe/2,0, 0,-etoe/2,-s, -s,etoe/2,0])
+    face( [-s,etoe/2,0, 0,-etoe/2,-s, 0,-etoe/2,s])
+    face( [0,-etoe/2,-s, s,etoe/2,0, 0,-etoe/2,s])
+    return {
+       vertexPositions: new Float32Array(coords),
+       vertexNormals: new Float32Array(normals),
+       vertexTextureCoords: new Float32Array(texCoords),
+       indices: new Uint16Array(indices)
+    }
+ }
 
 function quad(side, top, bottom) {
     var s = (side || 1)/2;

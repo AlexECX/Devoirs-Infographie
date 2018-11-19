@@ -2,30 +2,53 @@ from org.transcrypt import __pragma__  # __: skip
 from MV import mat4, vec4, vec3, ortho, flatten, radians, rotate, scale, translate, mult  # __: skip
 from daudet import createModel, extractNormalMatrix  # __: skip
 
+__pragma__('js', """
+/**
+* Shortcut pour créer un objet ({{}} représente un dictionnaire en python).
+*/""")
 def js_obj():
-    __pragma__('js', 'var obj = {{}}')
-    return obj
-
-def vec3_obj(x, y, z):
-    vec = js_obj()
-    vec.x = x
-    vec.y = y
-    vec.z = z
-    return vec
-
-def transformations(translate, rotation, scaling):
-    __pragma__('js', """var obj = {{}}
-    obj.translate = translate || mat4()
-    obj.rotate = rotation || mat4()
-    obj.scale = scaling || mat4()
-    """)
-    return obj
-
-def tri_heigth(b, c):
-    a = Math.sqrt(c*c - (b/2)*(b/2))
-    return a
+    __pragma__('js', 'return {{}}')
 
 
+__pragma__('js', """
+/**
+* Structure pour encapsuler des transformations matriciel.
+* L'attribut "multi" est employé pour appliquer une matrice,
+* composé ou non, après toutes les autres
+*/""")
+class Transform:
+    __pragma__('kwargs')
+    def __init__(self, **kwargs):
+        self.translate = kwargs.get("translate", mat4())
+        self.rotate = kwargs.get("rotate", mat4())
+        self.scale = kwargs.get("scale", mat4())
+        self.multi = kwargs.get("multi", mat4())
+    __pragma__('nokwargs')
+
+    def scale_factor(self):
+        __pragma__('js', 'var obj = {{}}')
+        obj.x = self.scale[0][0]
+        obj.y = self.scale[1][1]
+        obj.z = self.scale[2][2]
+        return obj
+
+    def combine(self):
+        return self.__class__(
+            multi=mult(self.multi, mult(self.translate, mult(self.rotate, self.scale)))
+        )
+
+    def __copy__(self):
+        newone = self.__class__(
+            translate=self.translate,
+            rotate=self.rotate,
+            scale=self.scale,
+            multi=self.multi
+        )
+        return newone
+
+__pragma__('js', """/**
+* Element de liste chainée
+*/""")
 class Node:
 
     def __init__(self, transform=None, render=None, sibling=None, child=None):
@@ -34,109 +57,126 @@ class Node:
         self.sibling = sibling
         self.child = child
 
-
+__pragma__('js', """/**
+* Classe représente un élément d'un modèle. Permet d'encapsuler
+* un sous ensemble de noeuds
+*/""")
 class Figure:
 
     def __init__(self):
         self.figure = []
         self.shapeList = []
-        self.scaleList = []
-        self.ids = js_obj()
         self.stack = []
-        self.modelViewMatrix = mat4()
-        self.preTransformList = []
+        self.transform = Transform()
+        
 
-        self.ids.list = []
-        self.ids.id = -1
-        def nextId():
-            self.ids.id = self.ids.id + 1
-            return self.ids.id
-        self.ids.nextId = nextId
+    def generic_shape(self, shapeList_index):
+        __pragma__('js', """//Fonction render de base pour à peu près tous les noeuds""")
+    
+        global modelview, normalMatrix
 
+        initialModelView = modelview
+        scaleSafeMatrix = mult(self.transform.translate, self.transform.rotate)
+        normalMatrix = extractNormalMatrix(mult(modelview, scaleSafeMatrix))
+
+        instanceMatrix = mult(self.transform.multi, scaleSafeMatrix)
+        instanceMatrix = mult(instanceMatrix, self.transform.scale)
+        modelview = mult(modelview, instanceMatrix)
+        self.shapeList[shapeList_index].render()
+        modelview = initialModelView
+
+    
     def traverse(self):
-        self.ids.id = -1
+        __pragma__('js', """//Permet de traverser la liste chainée de l'objet""")
 
         def _traverse(id):
-            self.stack.push(self.modelViewMatrix)
-            self.modelViewMatrix = mult(
-                self.modelViewMatrix, self.figure[id].transform)
+            self.stack.push(self.transform.__copy__())
+
+            self.transform.translate = mult(
+                self.transform.translate, self.figure[id].transform.translate)
+            self.transform.rotate = mult(
+                self.transform.rotate, self.figure[id].transform.rotate)
+            self.transform.scale = mult(
+                self.transform.scale, self.figure[id].transform.scale)
+            self.transform.multi = mult(
+                self.transform.multi, self.figure[id].transform.multi)
+
             self.figure[id].render()
             if self.figure[id].child != None:
                 _traverse(self.figure[id].child)
 
-            self.modelViewMatrix = self.stack.pop()
+            self.transform = self.stack.pop()
             if self.figure[id].sibling != None:
                 _traverse(self.figure[id].sibling)
         
         _traverse(0)
    
-
+__pragma__('js', """/**
+* Classe mère du vaisseau.
+*/""")
 class SpaceShip(Figure):
     
     def __init__(self):
         super().__init__()
         ID = 0
-        m = mat4()
+        self.shapeList.append(Wing())
+        self.shapeList.append(CenterPiece())
+
 
         def wing_render():
             surface = self.shapeList[0]
-            surface.modelViewMatrix = self.modelViewMatrix
+            surface.transform = self.transform.combine()
             surface.traverse()
 
-        self.shapeList.append(Wing())
-
-        m = mult(translate(10, 0,0), rotate(-20.0, 0,0,1))
+        m = Transform(
+            translate=translate(10, 0,0),
+            rotate=rotate(-20.0, 0,0,1), 
+            scale=scale(1,.75,1)
+        )
         self.figure.append(Node(m, wing_render, ID + 1, None))
         ID += 1
 
-        m = mult(translate(-10, 0,0), rotate(20.0, 0,0,1))
-        m = mult(m, scale(-1,1,1))
+        m = Transform(
+            translate=translate(-10, 0,0),
+            rotate=rotate(20.0, 0,0,1), 
+            scale=scale(-1,.75,1)
+        )
         self.figure.append(Node(m, wing_render, ID + 1, None))
         ID += 1
-
-        self.shapeList.append(CenterPiece())
 
         def center_render():
             surface = self.shapeList[1]
-            surface.modelViewMatrix = self.modelViewMatrix
+            surface.transform = self.transform
             surface.traverse()
 
-        m = translate(0, 5, 5)
+        m = Transform(multi=translate(0, 5, 5))
         self.figure.append(Node(m, center_render, None, None))
         ID += 1
 
+
     def render(self):
-        self.modelViewMatrix = mat4()
+        self.transform = Transform()
         self.traverse()
 
 
+__pragma__('js', """/**
+* Une aile du vaisseau
+*/""")
 class Wing(Figure):
-
-    size = 10.0
-    cy_heigth = 20.0
 
     def __init__(self):
         global gl
 
         super().__init__()
 
-        m = mat4()
-        size = self.size
-        cy_heigth = self.cy_heigth
+        size = 10.0
+        cy_heigth = 20.0
         ID = 0
+        generic_shape = self.generic_shape
         self.shapeList.append(createModel(cube(size)))
         self.shapeList.append(createModel(uvCylinder(10.0, cy_heigth, 25.0, False, False)))
-
-        def generic_shape(shapeList_index):
-            global modelview, normalMatrix
-            sc = self.scaleList[self.ids.nextId()]
-
-            initialModelView = modelview
-            normalMatrix = extractNormalMatrix(mult(modelview, self.modelViewMatrix))
-            instanceMatrix = mult(self.modelViewMatrix, scale(sc.x, sc.y, sc.z))
-            modelview = mult(modelview, instanceMatrix)
-            self.shapeList[shapeList_index].render()
-            modelview = initialModelView
+        self.shapeList.append(createModel(tetrahedre(10.0)))
+        #self.shapeList.append(Reactor())
 
         def rectangle():
             generic_shape(0)
@@ -144,117 +184,97 @@ class Wing(Figure):
         def cylinder():
             generic_shape(1)
 
-        #start wing construct
-        sc = vec3_obj(2,.5,2)
-        self.scaleList.append(sc)
-        self.figure.append(Node(m, rectangle, None, ID + 1))
+        def tetra():
+            generic_shape(2)
+
+        __pragma__('js', '//#start wing construct')
+        
+        m = Transform(scale=scale(2,.5,2))
+        self.figure.append(Node(m, rectangle, None, ID +1))
         ID += 1
 
-        sc = vec3_obj(sc.x/2, sc.y, sc.z * 1.5)
-        self.scaleList.append(sc)
-        m = translate(sc.x * size/2, 0, -(size*sc.z - size*sc.z/1.5/4))
-        self.figure.append(Node(m, rectangle, None, ID + 1))
+        
+        m = Transform(translate=translate(0,0,size), scale=scale(1,1,1))
+        self.figure.append(Node(m, tetra, ID +1, None))
         ID += 1
 
-
+        
+        m = Transform(scale=scale(.5, 1, 1.5))
+        m.translate = translate(size*2/2-size/2, 0, -(size*2/2+size*3/2))
+        self.figure.append(Node(m, rectangle, None, ID + 1))
+        ID += 1
+        
         #sibling branching
-        p_sc = self.scaleList[1]
-
-        #reactor
+        
+        __pragma__('js', '//#reactor')
+        __pragma__('js', '{}', """/*
+        
         def reactor():
-            global modelview, normalMatrix
-            sc = self.scaleList[self.ids.nextId()]
-            size = self.size
+            surface = self.shapeList[2]
+            surface.transform = self.transform
+            surface.traverse()
 
-            initialModelView = modelview
-            instanceMatrix = mult(self.modelViewMatrix, translate(0, (size*sc.y-size*sc.y*.10)/2 ,0))
-            normalMatrix = extractNormalMatrix(mult(modelview, self.modelViewMatrix))
-            instanceMatrix = mult(instanceMatrix, scale(sc.x, sc.y*.10, sc.z))
-            modelview = mult(modelview, instanceMatrix)
-            self.shapeList[0].render()
-            modelview = initialModelView
-
-            instanceMatrix = mult(self.modelViewMatrix, translate(0, -(size*sc.y-size*sc.y*.10)/2 ,0))
-            normalMatrix = extractNormalMatrix(mult(modelview, self.modelViewMatrix))
-            instanceMatrix = mult(instanceMatrix, scale(sc.x, sc.y*.10, sc.z))
-            modelview = mult(modelview, instanceMatrix)
-            self.shapeList[0].render()
-            modelview = initialModelView
-
-            instanceMatrix = mult(self.modelViewMatrix, translate((size*sc.x-size*sc.x*.10)/2, 0 ,0))
-            normalMatrix = extractNormalMatrix(mult(modelview, self.modelViewMatrix))
-            instanceMatrix = mult(instanceMatrix, scale(sc.x*.10, sc.y, sc.z))
-            modelview = mult(modelview, instanceMatrix)
-            self.shapeList[0].render()
-            modelview = initialModelView
-
-            instanceMatrix = mult(self.modelViewMatrix, translate(-(size*sc.x-size*sc.x*.10)/2, 0 ,0))
-            normalMatrix = extractNormalMatrix(mult(modelview, self.modelViewMatrix))
-            instanceMatrix = mult(instanceMatrix, scale(sc.x*.10, sc.y, sc.z))
-            modelview = mult(modelview, instanceMatrix)
-            self.shapeList[0].render()
-            modelview = initialModelView
-
-        sc = vec3_obj(p_sc.x*.75, p_sc.y * .75, p_sc.z*.10)
-        self.scaleList.append(sc)
-        m = translate(0, 0, -(size*p_sc.z/2))
+        m = Transform(
+            translate=translate(0,5,-15),
+            scale=scale(.5,.5,.10)
+        )
         
         self.figure.append(Node(m, reactor, ID + 1, None))
         ID += 1
+        */""")
+        
+        m = Transform(
+            translate=translate(0,0,-15),
+            scale=scale(.4,.4,.03)
+        )
+        self.figure.append(Node(m, cylinder, ID + 1, None))
+        ID += 1
 
-        #cannon 1/3
-        sc = vec3_obj(p_sc.x*.75, p_sc.y * .80, p_sc.z * 2/3)
-        self.scaleList.append(sc)
-        m = translate(p_sc.x*size/2 + sc.x*size/2, 0, -size*p_sc.z*.15)
+        __pragma__('js', '//#cannon 1/3')
+        
+        p_sc = m.scale_factor()
+        m = Transform(scale=scale(.75, .80, 2/3))
+        sc = m.scale_factor()
+        m.translate = translate(5+5*sc.x, 0, -3)
         self.figure.append(Node(m, rectangle, None, ID + 1))
         ID += 1
 
-        #cannon 2/3
-        sc = vec3_obj(sc.x*.80, sc.y * .60, sc.z * .50)
-        p_sc = self.scaleList[2]
-        self.scaleList.append(sc)
-        m = translate(0, 0, size*p_sc.x + size*sc.x)
+        __pragma__('js', '//#cannon 2/3')
+        p_sc = sc
+        
+        m = Transform(scale=scale(.80,.60,.50))
+        sc = m.scale_factor()
+        m.translate = translate(0, 0, size*p_sc.z + size*sc.z)
         self.figure.append(Node(m, rectangle, None, ID + 1))
         ID += 1
 
-        #cannon 3/3
-        sc = vec3_obj(sc.y*.80/2, sc.y* .80/2, sc.z/4)
-        p_sc = self.scaleList[2]
-        self.scaleList.append(sc)
-        m = translate(0, 0, size*p_sc.x/2 + cy_heigth*sc.z/2)
+        __pragma__('js', '//#cannon 3/3')
+        p_sc = sc
+        
+        m = Transform(scale=scale(.15, 3/4*.50, .30))
+        sc = m.scale_factor()
+        m.translate = translate(0, 0, size*p_sc.x/2 + cy_heigth*sc.z/2)
         self.figure.append(Node(m, cylinder, None, None))
 
-
-
-
+__pragma__('js', """/**
+* La partie central du vaisseau, ainsi que le cockpit
+*/""")
 class CenterPiece(Figure):
     
     def __init__(self):
         super().__init__()
-
-        self.transform = transformations()
 
         m = mat4()
         size = 10.0
         cy_heigth = 5.0
         cy_r = 10.0
         ID = 0
+        generic_shape = self.generic_shape
         self.shapeList.append(createModel(cube(size)))
-        self.shapeList.append(createModel(uvCylinder(cy_r, cy_heigth, 12.0, False, False)))
+        self.shapeList.append(createModel(uvCylinder(cy_r, cy_heigth, 22.0, False, False)))
         self.shapeList.append(createModel(uvCylinder(cy_r, cy_heigth, 6.0, False, False)))
         self.shapeList.append(createModel(quad(size, size, size/2)))
-
-        def generic_shape(shapeList_index):
-            global modelview, normalMatrix
-
-            initialModelView = modelview
-            instanceMatrix = mult(self.modelViewMatrix, self.transform.translate)
-            instanceMatrix = mult(instanceMatrix, self.transform.rotate)
-            normalMatrix = extractNormalMatrix(mult(modelview, instanceMatrix))
-            instanceMatrix = mult(instanceMatrix, self.transform.scale)
-            modelview = mult(modelview, instanceMatrix)
-            self.shapeList[shapeList_index].render()
-            modelview = initialModelView
+        self.shapeList.append(FrontCannon())
 
         def rectangle():
             generic_shape(0)
@@ -269,89 +289,250 @@ class CenterPiece(Figure):
             generic_shape(3)
 
 
-
-        sc = vec3_obj(.5,1,3)
-        m = transformations(None, None, scale(sc.x, sc.y, sc.z))
+        transfo = Transform(scale=scale(.5,1,3))
+        
+        m = transfo
         self.figure.append(Node(m, rectangle, None, ID +1))
         ID += 1
 
-        #mainframe cockpit start
-        transfo = transformations(None, rotate(90.0, 0,1,0), scale(1, .5, 1))
-        self.preTransformList.append(transfo)
-        m = translate(0,0,size*sc.z/2)
-        sc = vec3_obj(1, .5, 1)
+        __pragma__('js', """
+//#mainframe cockpit start""")
+        sc = transfo.scale_factor()
+        transfo = Transform(
+            rotate=rotate(90.0, 0,1,0), 
+            scale=mult(scale(1, .5, 1), mat4invert(transfo.scale))
+        )
+        
+        transfo.translate = translate(0,0,size*sc.z/2)
+        m = transfo
+        self.figure.append(Node(m, cylinder, None, ID + 1))
+        ID += 1
+
+        sc = transfo.scale_factor()
+        transfo = Transform(
+            rotate=rotate(50.0, 0,0,1),
+            scale=scale(.8,1,1),
+            translate=translate(0,-cy_r*1/2*.45,cy_r*1/2*1.15)
+        )
+        
+        m = transfo
+        self.figure.append(Node(m, cylinder, None, ID + 1))
+        ID += 1
+
+        sc = transfo.scale_factor()
+        transfo = Transform(
+            rotate=rotate(20.0, 0,0,1),
+            translate=translate(0,-cy_r*1/4,cy_r*1/4)
+        )
+        
+        m = transfo
+        self.figure.append(Node(m, cylinder, None, ID + 1))
+        ID += 1
+
+        __pragma__('js', """//#mainframe cockpit end
+        """)
+
+        sc = transfo.scale_factor()
+        transfo = Transform(
+            rotate=rotate(-80.0, 0,0,1),
+            scale=scale(.5, .5, 1),
+            translate=translate(0, -cy_heigth*1.1, cy_heigth*.80)
+        )
+        
+        m = transfo
         self.figure.append(Node(m, cylinder, ID + 1, None))
         ID += 1
 
-        trans = mult(trans, translate(0,-cy_r*sc.z/2*.45,cy_r*sc.z/2*1.15))
-        rotation = mult(rotate(50.0, 1,0,0), rotation)
-        m = mult(trans, rotation)
-        sc = vec3_obj(sc.x*.80, sc.y, sc.z)
-        self.scaleList.append(sc)
-        self.figure.append(Node(m, cylinder, ID + 1, None))
+        __pragma__('js', """//#canon""")
+        def canon_right():
+            surface = self.shapeList[4]
+            surface.transform = self.transform.combine()
+            surface.traverse()
+            
+        m = Transform(
+            translate=translate(cy_heigth/2+cy_heigth/4,-cy_heigth,0),
+            scale=mult(scale(.5,.5, .5), mat4invert(scale(.8,.5,1))),
+            rotate=mat4invert(mult(rotate(90.0, 0,1,0), rotate(70, 0,0,1)))
+        )
+        
+        self.figure.append(Node(m, canon_right, ID + 1, None))
         ID += 1
 
-        trans = mult(trans, translate(0,-cy_r*sc.z/2*.50,cy_r*sc.z/4))
-        rotation = mult(rotate(20.0, 1,0,0), rotation)
-        m = mult(trans, rotation)
-        sc = vec3_obj(sc.x, sc.y, sc.z)
-        self.scaleList.append(sc)
-        self.figure.append(Node(m, cylinder, ID + 1, None))
+        __pragma__('js', """//#canon""")
+        def canon_left():
+            surface = self.shapeList[4]
+            surface.transform = self.transform.combine()
+            surface.transform.translate = scale(-1,1,1)
+            surface.traverse()
+            
+            
+
+        m = m.__copy__()
+        m.translate = translate(-(cy_heigth/2+cy_heigth/4),-cy_heigth,0)
+        
+        self.figure.append(Node(m, canon_left, None, None))
+      
+__pragma__('js', """/**
+* Un canon avant du vaisseau
+*/""")
+class FrontCannon(Figure):
+    
+    def __init__(self):
+        super().__init__()
+
+        m = mat4()
+        size = 5.0
+        cy_heigth = 2.5
+        cy_r = 5.0
+        ID = 0
+        generic_shape = self.generic_shape
+        self.shapeList.append(createModel(uvCylinder(cy_r, cy_heigth, 6.0, False, False)))
+        self.shapeList.append(createModel(uvCylinder(cy_r, cy_heigth, 25.0, False, False)))
+        self.shapeList.append(createModel(quad(size, size, size/2)))
+
+        def cylinder6slice():
+            generic_shape(0)
+
+        def cylinder():
+            generic_shape(1)
+
+        def tri_rect():
+            generic_shape(2)
+
+        transfo = Transform(
+            rotate=rotate(30.0, 0,0,1),
+            scale=scale(1,1,5)
+        )
+        
+        m = transfo
+        self.figure.append(Node(m, cylinder6slice, None, ID + 1))
+        p_ID = ID
         ID += 1
 
-        #mainframe cockpit end
+        
 
-        m = mult(trans, translate(0, -cy_heigth*sc.x*1.1,cy_heigth*sc.z))
-        m = mult(m, rotate(90.0, 0,1,0))
-        m = mult(m, rotate(60.0, 0,0,1))
-        sc = vec3_obj(sc.y*.5, sc.y*.5, sc.z)
-        self.scaleList.append(sc)
-        self.figure.append(Node(m, cylinder, ID + 1, None))
+        sc = transfo.scale_factor()
+        transfo = Transform(
+            scale=scale(1/3, 1/3, 1+6/5),
+            translate=translate(0,0, cy_heigth*6)
+            )   
+            
+        m = transfo
+        self.figure.append(Node(m, cylinder, None, ID + 1))
+        
         ID += 1
 
-        trans = mult(trans, translate(cy_heigth*sc.z/2+cy_r*.25/2, -cy_heigth*sc.z,0))
-        m = mult(trans, rotate(30.0, 0,0,1))
-        sc = vec3_obj(.25, .25, 1)
-        self.scaleList.append(sc)
-        self.figure.append(Node(m, cylinder6slice, ID + 1, None))
+        transfo = Transform(
+            scale=scale(1.2, 1.2, 1/6),
+            translate=translate(0,0, -cy_heigth*3)
+            )
+            
+        m = transfo
+        self.figure.append(Node(m, cylinder, None, None))
         ID += 1
 
-        trans = mult(trans, translate(-cy_r*sc.x/2, cy_r*sc.y/4, -cy_heigth))
-        m = mult(trans, mult(rotate(180.0 , 0,0,1), rotate(-90.0, 0,1,0)))
-        sc = vec3_obj(1, .25, .10)
-        self.scaleList.append(sc)
+        self.figure[p_ID].sibling = ID
+        ID += 1
+
+        sc = sc
+        transfo = Transform(
+            rotate=mult(rotate(180.0 , 0,0,1), rotate(-90.0, 0,1,0)),
+            scale=scale(3/4*size,1,.5),
+            translate=translate(-cy_r/2, cy_r/4, -cy_heigth*5)
+        )    
+            
+        m = transfo
         self.figure.append(Node(m, tri_rect, None, None))
         ID += 1
 
-    def traverse(self):
-        self.ids.id = -1
+__pragma__('js', """/**
+* L'extrémité d'un réacteur. Je n'ai pas réussi à terminer l'implémentation
+*/""")
+class Reactor(Figure):
+    
+    def __init__(self):
+        global gl
 
-        def _traverse(id):
-            self.stack.push(self.transform)
-            self.tranform.translate = mult(
-                self.tranform.translate, self.figure[id].transform.translate
-            )
-            self.tranform.rotate = mult(
-                self.tranform.rotate, self.figure[id].transform.rotate
-            )
-            self.tranform.scale = mult(
-                self.tranform.scale, self.figure[id].transform.scale
-            )
-            self.figure[id].render()
-            if self.figure[id].child != None:
-                _traverse(self.figure[id].child)
+        super().__init__()
 
-            self.modelViewMatrix = self.stack.pop()
-            if self.figure[id].sibling != None:
-                _traverse(self.figure[id].sibling)
+        size = 10.0
+        ID = 0
+        m = Transform()
+        generic_shape = self.generic_shape
+        self.shapeList.append(createModel(cube(size)))
+
+        def render(transform):
+            global modelview, normalMatrix
+
+            initialModelView = modelview
+            scaleSafeMatrix = mult(self.transform.translate, transform.translate)
+            scaleSafeMatrix = mult(scaleSafeMatrix, mult(self.transform.rotate, transform.rotate))
+            normalMatrix = extractNormalMatrix(mult(modelview, scaleSafeMatrix))
+
+            instaceMatrix = mult(self.transform.multi, transform.multi)
+            instanceMatrix = mult(instaceMatrix, scaleSafeMatrix)
+            instanceMatrix = mult(instanceMatrix, transform.scale)
+            modelview = mult(modelview, instanceMatrix)
+            self.shapeList[0].render()
+            modelview = initialModelView
+
+        def sides():
+            transform = self.preTransformList[self.ids.nextId()]
+            sc = self.transform.scale_factor()
+            transform.translate[0][3] = transform.translate[0][3]*sc.x
+            transform.scale = mult(transfo.scale, scale(1,sc.y,1))
+            self.transform.scale[0][0] = 1
+            self.transform.scale[1][1] = 1
+            render(transform)
+            self.transform.scale = scale(sc.x, sc.y, sc.z)
+
+        def topbot():
+            transform = self.preTransformList[self.ids.nextId()]
+            sc = self.transform.scale_factor()
+            transform.translate[1][3] = transform.translate[1][3]*sc.y
+            transform.scale = mult(transfo.scale, scale(sc.x,1,1))
+            self.transform.scale[0][0] = 1
+            self.transform.scale[1][1] = 1
+            render(transform)
+            self.transform.scale = scale(sc.x, sc.y, sc.z)
+            
+
+        transfo = Transform(
+            translate=translate(size/2*.90, 0, 0),
+            scale=scale(.10,1,1)
+        )
+        self.preTransformList.append(transfo)
+        self.figure.append(Node(m, sides, ID + 1, None))
+        ID += 1
+
+        transfo = Transform(
+            translate=translate(-(size/2*.90), 0, 0),
+            scale=scale(.10,1,1)
+        )
+        self.preTransformList.append(transfo)
+        self.figure.append(Node(m, sides, ID + 1, None))
+        ID += 1
+
+        transfo = Transform(
+            translate=translate(0, size/2*.90, 0),
+            scale=scale(1,.10,1)
+        )
+        self.preTransformList.append(transfo)
+        self.figure.append(Node(m, topbot, ID + 1, None))
+        ID += 1
+
+        transfo = Transform(
+            translate=translate(0, -(size/2*.90), 0),
+            scale=scale(1,.10,1)
+        )
+        self.preTransformList.append(transfo)
+        self.figure.append(Node(m, topbot, None, None))
+        ID += 1
+
+        # m = translate(0, 0, -(size*p_sc.z/2))
         
-        _traverse(0)
-
-
-      
-
-class FrontCannon(object):
-    pass
+        # self.figure.append(Node(m, reactor, ID + 1, None))
+        # ID += 1
 
 
 

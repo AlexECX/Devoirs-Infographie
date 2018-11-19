@@ -1,5 +1,6 @@
 
-
+//globals dans un fichier à part pour ne pas
+//qu'ils soient encapsulé dans un module
 
 var gl = null;
 var prog = null;

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Structure "left-child-right-sibling"</title>
+
+<!
+  This example combines a skybox with a fully reflective teapot.
+  This program was developped by Daniel Audet as an example 
+  to illustrate how to use a left-child right-sibling structure 
+  to organize a graphic program.
+
+  The program includes a skybox and a teapot on which environmental
+  mapping is applied. The other objects (beach balls and cubes) are
+  shaded using the modified Phong model.
+
+  It uses the "MV.js" library developped for the book 
+  "Interactive Computer Graphics" written by Edward Angel and Dave Shreiner.
+-->
+
+
+<script type="x-shader/x-vertex" id="vshaderbox">
+     uniform mat4 projection;
+     uniform mat4 modelview;
+
+     attribute vec3 vcoords;
+     attribute vec3 vnormal;
+     attribute vec2 vtexcoord;
+
+     varying vec3 fCoords;
+
+     void main() {
+        vec2 tmp;
+        vec3 tmp2;
+
+		tmp = vtexcoord;
+		tmp2 = vnormal;
+   // inserted only to map texcoord and normal in this shader 
+   // (required since models uses texture coordinates even though 
+   //   we will not use them in this shader)
+
+        vec4 eyeCoords = modelview * vec4(vcoords,1.0);
+        gl_Position = projection * eyeCoords;
+        fCoords = vcoords;//gl_Position.xyz;
+
+		}
+</script>
+
+<script type="x-shader/x-fragment" id="fshaderbox">
+     precision mediump float;
+
+     varying vec3 fCoords;
+
+     uniform samplerCube skybox;
+
+     void main() {
+          gl_FragColor = textureCube(skybox, fCoords);
+     }
+</script>
+
+
+<script type="x-shader/x-vertex" id="vshader">
+     uniform mat4 projection;
+     uniform mat4 modelview;
+     uniform vec4 lightPosition;
+     uniform mat3 normalMatrix;
+
+     attribute vec3 vcoords;
+     attribute vec3 vnormal;
+     attribute  vec2 vtexcoord;
+
+     varying vec3 fN, fL, fE;
+     varying vec3 fviewCoords;
+     varying vec2 fTexCoord;
+
+     void main() {
+        vec4 eyeCoords = modelview * vec4(vcoords,1.0);
+        gl_Position = projection * eyeCoords;
+
+        vec3 pos = eyeCoords.xyz;
+
+        vec3 light = (lightPosition).xyz;
+
+          // Now compute vectors L, E and N.
+          // Note that N is affected by the 
+          // transformations applied.
+
+        fL = normalize( light - pos );
+        fE = normalize(-pos);
+        fN = normalMatrix * normalize(vnormal);
+
+  
+        fviewCoords = eyeCoords.xyz;
+        fTexCoord = vtexcoord;
+     }
+</script>
+
+<script type="x-shader/x-fragment" id="fshader">
+     precision mediump float;
+
+     uniform sampler2D texture;
+
+     uniform vec4 ambientProduct;
+     uniform vec4 diffuseProduct;
+     uniform vec4 specularProduct;
+     uniform float shininess;
+
+     varying vec3 fN, fL, fE;
+     varying vec3 fviewCoords;
+     varying vec2 fTexCoord;
+
+     void main() {
+
+          vec4 Color;
+    
+          vec3 H = normalize( fL + fE );
+          vec4 ambient = ambientProduct;
+ 
+          float factorLN = max( dot(fL, fN), 0.0 );
+          vec4  diffuse = factorLN*diffuseProduct;
+
+          float factorNH = pow( max(dot(fN, H), 0.0), shininess );
+          vec4  specular = factorNH * specularProduct;
+    
+          if( dot(fL, fN) < 0.0 )
+              specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+          Color = ambient + diffuse + specular;
+          Color.a = 1.0;
+
+          gl_FragColor = Color * texture2D( texture, fTexCoord );
+     }
+</script>
+
+<script type="x-shader/x-vertex" id="vshadermap">
+     uniform mat4 projection;
+     uniform mat4 modelview;
+
+     attribute vec3 vcoords;
+     attribute vec3 vnormal;
+
+     varying vec3 fviewCoords;
+     varying vec3 fNormal;
+
+     void main() {
+
+		vec4 eyeCoords = modelview * vec4(vcoords,1.0);
+        gl_Position = projection * eyeCoords;
+        fviewCoords = eyeCoords.xyz;
+        fNormal = vnormal;
+     }
+</script>
+
+<script type="x-shader/x-fragment" id="fshadermap">
+     precision mediump float;
+
+     varying vec3 fNormal;
+     varying vec3 fviewCoords;
+
+     uniform samplerCube skybox;
+     uniform mat3 normalMatrix;
+     uniform mat3 minv;
+
+     void main() {
+          vec3 N = normalMatrix * fNormal;
+          vec3 V = -fviewCoords;
+          vec3 R = -reflect(V,N);
+                             // note the reflect() function
+                             // computes the equation below but 
+                             // inverts the result (!!!)
+
+// alternate way of computing the reflected ray
+//          vec3 R = 2.0 * dot(V,N) * N - V; 
+
+ // Transform by inverse of view transform, which was applied to the skybox
+          R = minv * R;
+
+          gl_FragColor = textureCube(skybox, R);
+     }
+</script>
+
+
+<script type="text/javascript" src="../Common/simple-rotator.js"></script>
+<script type="text/javascript" src="../Common/basic-objects-IFS.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="Complete-example-left-child-right-sibling.js"></script>
+
+</head>
+<body style="background-color:#DDD">
+
+<h2>Exemple plus &eacute;labor&eacute; de l'utilisation d'une structure "left-child-right-sibling"</h2>
+
+<noscript><hr><h3>This page requires Javascript and a web browser that supports WebGL</h3><hr></noscript>
+
+<p id="message" style="font-weight:bold">Cliquez et d&eacute;placez votre souris pour faire tourner les objets et le "skybox". Appuyez sur les fl&egrave;ches pour faire tourner lentement la th&eacute;i&egrave;re.</p>
+
+
+<div>
+
+    <canvas width=600 height=600 id="glcanvas" style="background-color:blue"></canvas>
+
+</div>
+
+
+</body>
+</html>

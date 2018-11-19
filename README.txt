@@ -11,12 +11,11 @@ DÉROULEMENT:
 1 - À l'ouverture d'un html, la fonction draw est appellé.
 
 2 - La fonction draw effectue les appelles de fonction nécessaire à 
-    l'initialisation de WebGL et des shaders. Elle génère ensuite les points d'un cubes
-    et instancie des "listener" de bouttons.
+    l'initialisation de WebGL et des shaders. Elle instancie un objet SpaceShip qui
+    contient le nécessaire au rendu du vaisseau spatiale
 
-3 - Une boucle de render est ensuite appellée dans laquelle un anneau carré est
-    formé à partir des point. La taille et la position de l'anneau sont modifiées
-    en fonction des valeurs données par les sliders JS.
+3 - La fonction render est ensuite appellée une fois, puis à chaque fois qu'un listener
+      est déclenché. 
 
 
 Modules Javascript ES6:

@@ -3,16 +3,14 @@ from MV import mat4, vec4, vec3, ortho, flatten, radians, rotate, scale, transla
 from javascript import document, Math   # __: skip
 
 from webgl_utils import webgl_render, clear_canvas, init_webgl_inst, select_shaders
-from py_vector import Vector3D, Vector4D
-from shapes import Node, Wing, SpaceShip
+from shapes import SpaceShip, Transform
 
 
 __pragma__('js', """/*
 The main module: 
 - Will setup WebGL.
-- Launch JS Workers to recursively divide each faces of an object.
-- The last worker calls a render function. It will render each faces 
-  using the appropriate subset of points/vectors, with different colors. 
+- Initialise the SpaceShip object
+- Render the ship once and on onclick events
 */""")
 
 
@@ -161,9 +159,9 @@ def draw():
 
     # sphere = createModel(uvSphere(10.0, 25.0, 25.0))
     # cylinder = createModel(uvCylinder(10.0, 20.0, 25.0, False, False))
-    trirec = createModel(triangle_rectangle(10.0))
+    #trirec = createModel(triangle_rectangle(10.0))
     spaceship = SpaceShip()
-    box = createModel(quad(10.0, 5.0, 2.0))
+    #box = createModel(tetrahedre(10.0))
 
     # teapot = createModel(teapotModel)
     # disk = createModel(ring(5.0, 10.0, 25.0))
@@ -200,12 +198,10 @@ def render():
     flattenedmodelview = rotator.getViewMatrix()
     modelview = unflatten(flattenedmodelview)
     initialModelView = modelview
-    normalMatrix = extractNormalMatrix(modelview)
 
-    spaceship.render()
-    # modelview = mult(modelview, scale(2,1,1))
-    # box.render()
-    # trirec.render()
+    spaceship.transform = Transform()
+    spaceship.transform.multi = scale(.25,.25,.25)
+    spaceship.traverse()
 
     modelview = initialModelView
 
