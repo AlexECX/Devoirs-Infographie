@@ -41,7 +41,7 @@
                 //"-b",
                 "-n",
                 //"-m",
-                "${workspaceFolder}/Travaux/anneau"
+                "${workspaceFolder}/Travaux/main"
             ],
             "problemMatcher": []
         },
@@ -53,7 +53,7 @@
                 "-b",
                 "-n",
                 //"-m",
-                "${workspaceFolder}/Travaux/anneau"
+                "${workspaceFolder}/Travaux/main"
             ],
             "problemMatcher": []
         },

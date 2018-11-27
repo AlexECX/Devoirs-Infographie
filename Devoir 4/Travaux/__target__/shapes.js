@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-11-27 12:25:07
+// Transcrypt'ed from Python, 2018-11-20 14:41:55
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 var __name__ = 'shapes';
 
@@ -7,18 +7,6 @@ var __name__ = 'shapes';
 */
 export var js_obj = function () {
 	return {}
-};
-/**
-* Shortcut to set Ambiant, Diffuse and Specular properties. 
-*/ 
-
-export var set_colors = function (Ka, Kd, Ks) {
-	ambientProduct = mult (lightAmbient, Ka);
-	diffuseProduct = mult (lightDiffuse, Kd);
-	specularProduct = mult (lightSpecular, Ks);
-	gl.uniform4fv (gl.getUniformLocation (prog, 'ambientProduct'), flatten (ambientProduct));
-	gl.uniform4fv (gl.getUniformLocation (prog, 'diffuseProduct'), flatten (diffuseProduct));
-	gl.uniform4fv (gl.getUniformLocation (prog, 'specularProduct'), flatten (specularProduct));
 };
 
 /**
@@ -180,36 +168,14 @@ export var Wing =  __class__ ('Wing', [Figure], {
 		self.shapeList.append (createModel (cube (size)));
 		self.shapeList.append (createModel (uvCylinder (10.0, cy_heigth, 25.0, false, false)));
 		self.shapeList.append (createModel (tetrahedre (10.0)));
-		self.shapeList.append (createModel (uvCylinder (10.0, cy_heigth, 25.0, true, true)));
 		var rectangle = function () {
 			self.generic_shape (self.shapeList [0]);
 		};
 		var cylinder = function () {
 			self.generic_shape (self.shapeList [1]);
 		};
-		var reactor = function () {
-			var Ka = vec4 ();
-			var Kd = vec4 (255 / 255, 111 / 255, 71 / 255);
-			var Ks = vec4 ();
-			set_colors (Ka, Kd, Ks);
-			self.generic_shape (self.shapeList [1]);
-			set_colors (materialAmbient, materialDiffuse, materialSpecular);
-		};
-		var reactor_exterior = function () {
-			var Ka = vec4 ();
-			var Kd = vec4 (17 / 255, 18 / 255, 13 / 255);
-			var Ks = materialSpecular.__getslice__ (0, null, 1);
-			set_colors (Ka, Kd, Ks);
-			self.generic_shape (self.shapeList [3]);
-			set_colors (materialAmbient, materialDiffuse, materialSpecular);
-		};
 		var tetra = function () {
-			var Ka = vec4 ();
-			var Kd = vec4 (92 / 255, 22 / 255, 22 / 255);
-			var Ks = materialSpecular.__getslice__ (0, null, 1);
-			set_colors (Ka, Kd, Ks);
 			self.generic_shape (self.shapeList [2]);
-			set_colors (materialAmbient, materialDiffuse, materialSpecular);
 		};
 		//#start wing construct
 		var m = Transform (__kwargtrans__ ({scale: scale (2, 0.5, 2)}));
@@ -222,13 +188,24 @@ export var Wing =  __class__ ('Wing', [Figure], {
 		m.translate = translate ((size * 2) / 2 - size / 2, 0, -((size * 2) / 2 + (size * 3) / 2));
 		self.figure.append (Node (m, rectangle, null, ID + 1));
 		ID++;
-		//#reactor interior
+		//#reactor
+		/*
+		        
+		        def reactor():
+		            surface = self.shapeList[2]
+		            surface.transform = self.transform
+		            surface.traverse()
+		
+		        m = Transform(
+		            translate=translate(0,5,-15),
+		            scale=scale(.5,.5,.10)
+		        )
+		        
+		        self.figure.append(Node(m, reactor, ID + 1, None))
+		        ID += 1
+		        */
 		var m = Transform (__kwargtrans__ ({translate: translate (0, 0, -(15)), scale: scale (0.4, 0.4, 0.03)}));
-		self.figure.append (Node (m, reactor, ID + 2, ID + 1));
-		ID++;
-		//#reactor exterior
-		var m = Transform (__kwargtrans__ ({scale: scale (1.01, 1.01, 2)}));
-		self.figure.append (Node (m, reactor_exterior, null, null));
+		self.figure.append (Node (m, cylinder, ID + 1, null));
 		ID++;
 		//#cannon 1/3
 		var m = Transform (__kwargtrans__ ({scale: scale (0.75, 0.8, 2 / 3)}));
@@ -269,14 +246,6 @@ export var CenterPiece =  __class__ ('CenterPiece', [Figure], {
 		var cylinder = function () {
 			self.generic_shape (self.shapeList [1]);
 		};
-		var front_cylinder = function () {
-			var Ka = vec4 ();
-			var Kd = vec4 (92 / 255, 22 / 255, 22 / 255);
-			var Ks = vec4 ();
-			set_colors (Ka, Kd, Ks);
-			self.generic_shape (self.shapeList [1]);
-			set_colors (materialAmbient, materialDiffuse, materialSpecular);
-		};
 		var cylinder6slice = function () {
 			self.generic_shape (self.shapeList [2]);
 		};
@@ -299,9 +268,9 @@ export var CenterPiece =  __class__ ('CenterPiece', [Figure], {
 		ID++;
 		//#mainframe cockpit end
 		        
-		//#front
-		var m = Transform (__kwargtrans__ ({rotate: rotate (-(80.0), 0, 0, 1), scale: scale (0.5, 0.5, 0.98), translate: translate (0, -(cy_heigth) * 1.1, cy_heigth * 0.8)}));
-		self.figure.append (Node (m, front_cylinder, ID + 1, null));
+		//#reactor
+		var m = Transform (__kwargtrans__ ({rotate: rotate (-(80.0), 0, 0, 1), scale: scale (0.5, 0.5, 1), translate: translate (0, -(cy_heigth) * 1.1, cy_heigth * 0.8)}));
+		self.figure.append (Node (m, cylinder, ID + 1, null));
 		ID++;
 		//#canon
 		var canon_right = function () {
@@ -340,46 +309,23 @@ export var FrontCannon =  __class__ ('FrontCannon', [Figure], {
 		self.shapeList.append (createModel (uvCylinder (cy_r, cy_heigth, 25.0, false, false)));
 		self.shapeList.append (createModel (quad (size, size, size / 2)));
 		var cylinder6slice = function () {
-			var Ka = vec4 ();
-			var Kd = vec4 (191 / 255, 191 / 255, 191 / 255);
-			var Ks = materialSpecular.__getslice__ (0, null, 1);
-			set_colors (Ka, Kd, Ks);
 			self.generic_shape (self.shapeList [0]);
-			set_colors (materialAmbient, materialDiffuse, materialSpecular);
 		};
-		var cylinder1 = function () {
-			var Ka = vec4 ();
-			var Kd = vec4 (65 / 255, 65 / 255, 65 / 255);
-			var Ks = materialSpecular.__getslice__ (0, null, 1);
-			set_colors (Ka, Kd, Ks);
+		var cylinder = function () {
 			self.generic_shape (self.shapeList [1]);
-			set_colors (materialAmbient, materialDiffuse, materialSpecular);
-		};
-		var cylinder2 = function () {
-			var Ka = vec4 ();
-			var Kd = vec4 (103 / 255, 103 / 255, 103 / 255);
-			var Ks = materialSpecular.__getslice__ (0, null, 1);
-			set_colors (Ka, Kd, Ks);
-			self.generic_shape (self.shapeList [1]);
-			set_colors (materialAmbient, materialDiffuse, materialSpecular);
 		};
 		var tri_rect = function () {
-			var Ka = vec4 ();
-			var Kd = vec4 (56 / 255, 15 / 255, 19 / 255);
-			var Ks = materialSpecular.__getslice__ (0, null, 1);
-			set_colors (Ka, Kd, Ks);
 			self.generic_shape (self.shapeList [2]);
-			set_colors (materialAmbient, materialDiffuse, materialSpecular);
 		};
 		var m = Transform (__kwargtrans__ ({rotate: rotate (30.0, 0, 0, 1), scale: scale (1, 1, 5)}));
 		self.figure.append (Node (m, cylinder6slice, null, ID + 1));
 		var p_ID = ID;
 		ID++;
 		var m = Transform (__kwargtrans__ ({scale: scale (1 / 3, 1 / 3, 1 + 6 / 5), translate: translate (0, 0, cy_heigth * 6)}));
-		self.figure.append (Node (m, cylinder1, null, ID + 1));
+		self.figure.append (Node (m, cylinder, null, ID + 1));
 		ID++;
 		var m = Transform (__kwargtrans__ ({scale: scale (1.2, 1.2, 1 / 6), translate: translate (0, 0, -(cy_heigth) * 3)}));
-		self.figure.append (Node (m, cylinder2, null, null));
+		self.figure.append (Node (m, cylinder, null, null));
 		ID++;
 		self.figure [p_ID].sibling = ID;
 		ID++;

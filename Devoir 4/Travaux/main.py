@@ -4,7 +4,7 @@ from javascript import document, Math   # __: skip
 
 from webgl_utils import webgl_render, clear_canvas, init_webgl_inst, select_shaders
 from shapes import SpaceShip, Transform
-
+from py_vector import Vector3D, Matrice4
 
 __pragma__('js', """/*
 The main module: 
@@ -16,9 +16,6 @@ The main module:
 
 # gl = None
 # prog = None
-# __pragma__('js', '//Dimension of render')
-# render_D = 3
-# # othrt
 # # Location of the coords attribute variable in the standard texture mappping shader program.
 # CoordsLoc = None
 # NormalLoc = None
@@ -88,7 +85,6 @@ __pragma__('js', '{}', """\n//This is the main 3D function""")
 
 def draw():
     global gl, prog, rotator
-    global render_D
     global trirec, sphere, cylinder, box, teapot, disk, torus, cone,  \
         hemisphereinside, hemisphereoutside, thindisk, \
         quartersphereinside, quartersphereoutside, wing, spaceship
@@ -195,6 +191,10 @@ def render():
     gl.clearColor(0.79, 0.76, 0.27, 1)
     clear_canvas(gl)
 
+    g = Matrice4(2)
+    c = Matrice4(3)
+    k = c * g #__: opov
+
     flattenedmodelview = rotator.getViewMatrix()
     modelview = unflatten(flattenedmodelview)
     initialModelView = modelview
@@ -202,10 +202,9 @@ def render():
     # modelview = mult(modelview, scale(1, 4, .5))
     # box.render()
     spaceship.transform = Transform()
-    spaceship.transform.multi = scale(.25,.25,.25)
+    #spaceship.transform.multi = scale(.25,.25,.25)
     spaceship.traverse()
     
-
     modelview = initialModelView
 
 

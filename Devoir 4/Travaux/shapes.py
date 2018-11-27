@@ -9,25 +9,6 @@ __pragma__('js', """
 def js_obj():
     __pragma__('js', 'return {{}}')
 
-__pragma__('js', '{}', """/**
-* Shortcut to set Ambiant, Diffuse and Specular properties. 
-*/ 
-""")
-def set_colors(Ka, Kd, Ks):
-    global ambientProduct, diffuseProduct, specularProduct, \
-            lightAmbient, lightDiffuse, lightSpecular, gl, prog
-            
-    ambientProduct = mult(lightAmbient, Ka)
-    diffuseProduct = mult(lightDiffuse, Kd)
-    specularProduct = mult(lightSpecular, Ks)
-
-    gl.uniform4fv(gl.getUniformLocation(
-        prog, "ambientProduct"), flatten(ambientProduct))
-    gl.uniform4fv(gl.getUniformLocation(
-        prog, "diffuseProduct"), flatten(diffuseProduct))
-    gl.uniform4fv(gl.getUniformLocation(
-        prog, "specularProduct"), flatten(specularProduct))
-
 
 __pragma__('js', """
 /**
@@ -195,7 +176,7 @@ class Wing(Figure):
         self.shapeList.append(createModel(cube(size)))
         self.shapeList.append(createModel(uvCylinder(10.0, cy_heigth, 25.0, False, False)))
         self.shapeList.append(createModel(tetrahedre(10.0)))
-        self.shapeList.append(createModel(uvCylinder(10.0, cy_heigth, 25.0, True, True)))
+        #self.shapeList.append(Reactor())
 
         def rectangle():
             self.generic_shape(self.shapeList[0])
@@ -203,32 +184,8 @@ class Wing(Figure):
         def cylinder():
             self.generic_shape(self.shapeList[1])
 
-        def reactor():
-            global materialAmbient, materialDiffuse, materialSpecular 
-            Ka = vec4()
-            Kd = vec4(255/255,111/255,71/255)
-            Ks = vec4()
-            set_colors(Ka, Kd, Ks)
-            self.generic_shape(self.shapeList[1])
-            set_colors(materialAmbient, materialDiffuse, materialSpecular)
-
-        def reactor_exterior():
-            global materialAmbient, materialDiffuse, materialSpecular 
-            Ka = vec4()
-            Kd = vec4(17/255,18/255,13/255)
-            Ks = materialSpecular[:]
-            set_colors(Ka, Kd, Ks)
-            self.generic_shape(self.shapeList[3])
-            set_colors(materialAmbient, materialDiffuse, materialSpecular)
-
         def tetra():
-            global materialAmbient, materialDiffuse, materialSpecular 
-            Ka = vec4()
-            Kd = vec4(92/255,22/255,22/255)
-            Ks = materialSpecular[:]
-            set_colors(Ka, Kd, Ks)
             self.generic_shape(self.shapeList[2])
-            set_colors(materialAmbient, materialDiffuse, materialSpecular)
 
         __pragma__('js', '//#start wing construct')
         
@@ -248,21 +205,29 @@ class Wing(Figure):
         ID += 1
         
         #sibling branching
+        
+        __pragma__('js', '//#reactor')
+        __pragma__('js', '{}', """/*
+        
+        def reactor():
+            surface = self.shapeList[2]
+            surface.transform = self.transform
+            surface.traverse()
 
-        __pragma__('js', '//#reactor interior')
+        m = Transform(
+            translate=translate(0,5,-15),
+            scale=scale(.5,.5,.10)
+        )
+        
+        self.figure.append(Node(m, reactor, ID + 1, None))
+        ID += 1
+        */""")
+        
         m = Transform(
             translate=translate(0,0,-15),
             scale=scale(.4,.4,.03)
         )
-        self.figure.append(Node(m, reactor, ID + 2, ID + 1))
-        ID += 1
-
-        __pragma__('js', '//#reactor exterior')
-        m = Transform(
-            #translate=translate(0,0,-3),
-            scale=scale(1.01,1.01,2)
-        )
-        self.figure.append(Node(m, reactor_exterior, None, None))
+        self.figure.append(Node(m, cylinder, ID + 1, None))
         ID += 1
 
         __pragma__('js', '//#cannon 1/3')
@@ -310,15 +275,6 @@ class CenterPiece(Figure):
         def cylinder():
             self.generic_shape(self.shapeList[1])
 
-        def front_cylinder():
-            global materialAmbient, materialDiffuse, materialSpecular 
-            Ka = vec4()
-            Kd = vec4(92/255,22/255,22/255)
-            Ks = vec4()
-            set_colors(Ka, Kd, Ks)
-            self.generic_shape(self.shapeList[1])
-            set_colors(materialAmbient, materialDiffuse, materialSpecular)
-
         def cylinder6slice():
             self.generic_shape(self.shapeList[2])
 
@@ -358,13 +314,13 @@ class CenterPiece(Figure):
         __pragma__('js', """//#mainframe cockpit end
         """)
 
-        __pragma__('js', '{}', """//#front""")
+        __pragma__('js', '{}', """//#reactor""")
         m = Transform(
             rotate=rotate(-80.0, 0,0,1),
-            scale=scale(.5, .5, .98),
+            scale=scale(.5, .5, 1),
             translate=translate(0, -cy_heigth*1.1, cy_heigth*.80)
         )
-        self.figure.append(Node(m, front_cylinder, ID + 1, None))
+        self.figure.append(Node(m, cylinder, ID + 1, None))
         ID += 1
 
         __pragma__('js', """//#canon""")
@@ -410,42 +366,13 @@ class FrontCannon(Figure):
         self.shapeList.append(createModel(quad(size, size, size/2)))
 
         def cylinder6slice():
-            global materialAmbient, materialDiffuse, materialSpecular 
-            Ka = vec4()
-            Kd = vec4(191/255,191/255,191/255)
-            Ks = materialSpecular[:]
-            set_colors(Ka, Kd, Ks)
             self.generic_shape(self.shapeList[0])
-            set_colors(materialAmbient, materialDiffuse, materialSpecular)
 
-        def cylinder1():
-            global materialAmbient, materialDiffuse, materialSpecular 
-            Ka = vec4()
-            Kd = vec4(65/255,65/255,65/255)
-            Ks = materialSpecular[:]
-            set_colors(Ka, Kd, Ks)
+        def cylinder():
             self.generic_shape(self.shapeList[1])
-            set_colors(materialAmbient, materialDiffuse, materialSpecular)
-
-
-        def cylinder2():
-            global materialAmbient, materialDiffuse, materialSpecular 
-            Ka = vec4()
-            Kd = vec4(103/255,103/255,103/255)
-            Ks = materialSpecular[:]
-            set_colors(Ka, Kd, Ks)
-            self.generic_shape(self.shapeList[1])
-            set_colors(materialAmbient, materialDiffuse, materialSpecular)
-
 
         def tri_rect():
-            global materialAmbient, materialDiffuse, materialSpecular 
-            Ka = vec4()
-            Kd = vec4(56/255,15/255,19/255)
-            Ks = materialSpecular[:]
-            set_colors(Ka, Kd, Ks)
             self.generic_shape(self.shapeList[2])
-            set_colors(materialAmbient, materialDiffuse, materialSpecular)
 
         m = Transform(
             rotate=rotate(30.0, 0,0,1),
@@ -459,7 +386,7 @@ class FrontCannon(Figure):
             scale=scale(1/3, 1/3, 1+6/5),
             translate=translate(0,0, cy_heigth*6)
             )   
-        self.figure.append(Node(m, cylinder1, None, ID + 1))
+        self.figure.append(Node(m, cylinder, None, ID + 1))
         
         ID += 1
 
@@ -467,7 +394,7 @@ class FrontCannon(Figure):
             scale=scale(1.2, 1.2, 1/6),
             translate=translate(0,0, -cy_heigth*3)
             )
-        self.figure.append(Node(m, cylinder2, None, None))
+        self.figure.append(Node(m, cylinder, None, None))
         ID += 1
 
         self.figure[p_ID].sibling = ID
