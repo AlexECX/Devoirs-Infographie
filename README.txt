@@ -12,10 +12,12 @@ DÉROULEMENT:
 
 2 - La fonction draw effectue les appelles de fonction nécessaire à 
     l'initialisation de WebGL et des shaders. Elle instancie un objet SpaceShip qui
-    contient le nécessaire au rendu du vaisseau spatiale
+    contient le nécessaire au rendu du vaisseau spatiale et charge les différentes
+    textures. 
 
 3 - La fonction render est ensuite appellée une fois, puis à chaque fois qu'un listener
-      est déclenché. 
+      est déclenché, mais le vaisseau sera rendu seulement après que toutes les textures
+      aient été chargées. 
 
 
 Modules Javascript ES6:

@@ -1,0 +1,38 @@
+0 - Une des caractéristique du Basilisk dans le jeu StarLancerest sa 
+capacité à se rendre invisible, j'ai donc voulu l'implémenter. Le vaisseau 
+commence à l'état invisible, puis transitionne à l'état visible après 1.5 
+seconde. On peut changer d'état avec les bouton "Cloak". La fonction 
+utilisée est invisible() du fichier main.js.
+
+1 - Vous devez ajouter des détails graphiques:
+* Une fenêtre a été ajoutée au cockpit. Je suis satisfait du reste.
+
+2- Vous devrez définir au moins cinq (5) propriétés de surface différentes 
+et les appliquer sur différents éléments de votre vaisseau.
+* L'assignation de couleurs se fait dans les fonctions de render des nœuds
+* contenue dans les classes de shapes.js. La fonction set_colors de shapes.js 
+* est utilisé comme raccourci pour transmettre les couleurs. À elle seul, la classe 
+* FrontCanon défini 4 couleurs pour les différentes composantes du canon. 
+
+3- Vous devez assigner une propriété "émissive" à trois (3) éléments graphiques de
+votre vaisseau/objet.
+* Le nez à l'avant du vaisseau (front_cylinder() dans la classe CenterPiece)
+* ainsi que l'intérieur des deux réacteurs arrière (reactor() dans la classe Wing) 
+* ont été choisi. Le terme "specular" ou Ks a été mis à zéro pour accomplir cette
+* effet (note: le terme ambiant l'est aussi, mais c'est généralement le cas pour
+* toutes les pièces)
+
+4- Vous devrez appliquer cinq (5) textures différentes sur (au moins) 5 éléments
+visibles de votre vaisseau/objet.
+* L'assignation de textures se fait dans les fonctions de render des nœuds
+* contenue dans les classes de shapes.js. La fonction set_texture de shapes.js 
+* est utilisé comme raccourci pour transmettre les textures. À elle seul, la classe
+* Wing utilise 6 textures différente, la plupart ont été découpé d'une photo
+* du vaisseau original.
+
+5- On doit pouvoir tourner votre vaisseau/objet sans que les sources lumineuses ne
+bougent. On devrait voir l'effet de la lumière sur toutes les surfaces.
+* Le fragment shader combine la couleur du modèle de Phong avec celle obtenu
+* avec la texture. Par défaut, une couleur de base grisâtre est utilisé avec une 
+* texture d'alliage spatiale. Lorsque seulement la couleur de Phong est désirée, on
+* utilise une texture blanche. (ex. couleur orange flamme des réacteurs arrière)

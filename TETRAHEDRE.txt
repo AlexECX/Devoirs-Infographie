@@ -1,2 +1,0 @@
-Le tetrahedre se trouve au début du fichier Travaux/basic-objects-IFS.js. 
-Il est utilisé sur les ailes, à l'avant du vaisseau.
