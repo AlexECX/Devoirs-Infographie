@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-11-27 12:25:07
+// Transcrypt'ed from Python, 2018-11-27 20:53:26
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 var __name__ = 'shapes';
 
@@ -10,8 +10,7 @@ export var js_obj = function () {
 };
 /**
 * Shortcut to set Ambiant, Diffuse and Specular properties. 
-*/ 
-
+*/
 export var set_colors = function (Ka, Kd, Ks) {
 	ambientProduct = mult (lightAmbient, Ka);
 	diffuseProduct = mult (lightDiffuse, Kd);
@@ -19,6 +18,14 @@ export var set_colors = function (Ka, Kd, Ks) {
 	gl.uniform4fv (gl.getUniformLocation (prog, 'ambientProduct'), flatten (ambientProduct));
 	gl.uniform4fv (gl.getUniformLocation (prog, 'diffuseProduct'), flatten (diffuseProduct));
 	gl.uniform4fv (gl.getUniformLocation (prog, 'specularProduct'), flatten (specularProduct));
+};
+/**
+* Shortcut to set the texture. 
+*/
+export var set_texture = function (index) {
+	gl.activeTexture (gl.TEXTURE0);
+	gl.bindTexture (gl.TEXTURE_2D, textureList [index]);
+	gl.uniform1i (gl.getUniformLocation (prog, 'texture'), 0);
 };
 
 /**
@@ -95,9 +102,12 @@ export var Node =  __class__ ('Node', [object], {
 */
 export var Figure =  __class__ ('Figure', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self) {
+	get __init__ () {return __get__ (this, function (self, shapes) {
+		if (typeof shapes == 'undefined' || (shapes != null && shapes.hasOwnProperty ("__kwargtrans__"))) {;
+			var shapes = null;
+		};
 		self.figure = list ([]);
-		self.shapeList = list ([]);
+		self.shapeList = (shapes ? shapes : list ([]));
 		self.stack = list ([]);
 		self.transform = Transform ();
 	});},
@@ -158,7 +168,7 @@ export var SpaceShip =  __class__ ('SpaceShip', [Figure], {
 			surface.transform = self.transform;
 			surface.traverse ();
 		};
-		var m = Transform (__kwargtrans__ ({multi: translate (0, 5, 5)}));
+		var m = Transform (__kwargtrans__ ({multi: translate (0, 5, 2)}));
 		self.figure.append (Node (m, center_render, null, null));
 		ID++;
 	});},
@@ -184,6 +194,31 @@ export var Wing =  __class__ ('Wing', [Figure], {
 		var rectangle = function () {
 			self.generic_shape (self.shapeList [0]);
 		};
+		var wing_logo = function () {
+			set_texture (1);
+			self.generic_shape (self.shapeList [0]);
+			set_texture (0);
+		};
+		var wing_long = function () {
+			set_texture (2);
+			self.generic_shape (self.shapeList [0]);
+			set_texture (0);
+		};
+		var canon_main = function () {
+			set_texture (3);
+			self.generic_shape (self.shapeList [0]);
+			set_texture (0);
+		};
+		var canon_housing = function () {
+			set_texture (4);
+			self.generic_shape (self.shapeList [0]);
+			set_texture (0);
+		};
+		var canon_end = function () {
+			set_texture (5);
+			self.generic_shape (self.shapeList [1]);
+			set_texture (0);
+		};
 		var cylinder = function () {
 			self.generic_shape (self.shapeList [1]);
 		};
@@ -192,8 +227,10 @@ export var Wing =  __class__ ('Wing', [Figure], {
 			var Kd = vec4 (255 / 255, 111 / 255, 71 / 255);
 			var Ks = vec4 ();
 			set_colors (Ka, Kd, Ks);
+			set_texture (6);
 			self.generic_shape (self.shapeList [1]);
 			set_colors (materialAmbient, materialDiffuse, materialSpecular);
+			set_texture (0);
 		};
 		var reactor_exterior = function () {
 			var Ka = vec4 ();
@@ -213,14 +250,14 @@ export var Wing =  __class__ ('Wing', [Figure], {
 		};
 		//#start wing construct
 		var m = Transform (__kwargtrans__ ({scale: scale (2, 0.5, 2)}));
-		self.figure.append (Node (m, rectangle, null, ID + 1));
+		self.figure.append (Node (m, wing_logo, null, ID + 1));
 		ID++;
 		var m = Transform (__kwargtrans__ ({translate: translate (0, 0, size), scale: scale (1, 1, 1)}));
 		self.figure.append (Node (m, tetra, ID + 1, null));
 		ID++;
 		var m = Transform (__kwargtrans__ ({scale: scale (0.5, 1, 1.5)}));
 		m.translate = translate ((size * 2) / 2 - size / 2, 0, -((size * 2) / 2 + (size * 3) / 2));
-		self.figure.append (Node (m, rectangle, null, ID + 1));
+		self.figure.append (Node (m, wing_long, null, ID + 1));
 		ID++;
 		//#reactor interior
 		var m = Transform (__kwargtrans__ ({translate: translate (0, 0, -(15)), scale: scale (0.4, 0.4, 0.03)}));
@@ -233,17 +270,17 @@ export var Wing =  __class__ ('Wing', [Figure], {
 		//#cannon 1/3
 		var m = Transform (__kwargtrans__ ({scale: scale (0.75, 0.8, 2 / 3)}));
 		m.translate = translate (5 + 5 * 0.75, 0, -(3));
-		self.figure.append (Node (m, rectangle, null, ID + 1));
+		self.figure.append (Node (m, canon_main, null, ID + 1));
 		ID++;
 		//#cannon 2/3
 		var m = Transform (__kwargtrans__ ({scale: scale (0.8, 0.6, 0.5)}));
 		m.translate = translate (0, 0, (size * 2) / 3 + size * 0.5);
-		self.figure.append (Node (m, rectangle, null, ID + 1));
+		self.figure.append (Node (m, canon_housing, null, ID + 1));
 		ID++;
 		//#cannon 3/3
 		var m = Transform (__kwargtrans__ ({scale: scale (0.15, (3 / 4) * 0.5, 0.3)}));
 		m.translate = translate (0, 0, (size * 0.8) / 2 + (cy_heigth * 0.3) / 2);
-		self.figure.append (Node (m, cylinder, null, null));
+		self.figure.append (Node (m, canon_end, null, null));
 	});}
 });
 /**
@@ -264,10 +301,31 @@ export var CenterPiece =  __class__ ('CenterPiece', [Figure], {
 		self.shapeList.append (createModel (quad (size, size, size / 2)));
 		self.shapeList.append (FrontCannon ());
 		var rectangle = function () {
+			var Ka = vec4 (0.13, 0.13, 0.13);
+			var Kd = vec4 (64 / 255, 64 / 255, 64 / 255);
+			var Ks = materialSpecular.__getslice__ (0, null, 1);
+			set_colors (Ka, Kd, Ks);
 			self.generic_shape (self.shapeList [0]);
+			set_colors (materialAmbient, materialDiffuse, materialSpecular);
 		};
 		var cylinder = function () {
+			var Ka = vec4 ();
+			var Kd = vec4 (72 / 255, 7 / 255, 7 / 255);
+			var Ks = materialSpecular.__getslice__ (0, null, 1);
+			set_colors (Ka, Kd, Ks);
+			set_texture (0);
 			self.generic_shape (self.shapeList [1]);
+			set_colors (materialAmbient, materialDiffuse, materialSpecular);
+			set_texture (0);
+		};
+		var cockpit_glass = function () {
+			var Ka = vec4 (0.13, 0.13, 0.13);
+			var Kd = materialDiffuse.__getslice__ (0, null, 1);
+			var Ks = vec4 (0.75, 0.75, 0.75);
+			set_colors (Ka, Kd, Ks);
+			set_texture (7);
+			self.generic_shape (self.shapeList [1]);
+			set_texture (0);
 		};
 		var front_cylinder = function () {
 			var Ka = vec4 ();
@@ -277,30 +335,30 @@ export var CenterPiece =  __class__ ('CenterPiece', [Figure], {
 			self.generic_shape (self.shapeList [1]);
 			set_colors (materialAmbient, materialDiffuse, materialSpecular);
 		};
-		var cylinder6slice = function () {
-			self.generic_shape (self.shapeList [2]);
-		};
-		var tri_rect = function () {
-			self.generic_shape (self.shapeList [3]);
-		};
-		var m = Transform (__kwargtrans__ ({scale: scale (0.5, 1, 3)}));
-		self.figure.append (Node (m, rectangle, null, ID + 1));
+		var m = Transform (__kwargtrans__ ({scale: scale (0.5, 1, 2.5)}));
+		self.figure.append (Node (m, rectangle, ID + 1, ID + 2));
+		ID++;
+		var m = Transform (__kwargtrans__ ({scale: scale (0.505, 0.7, 0.7), rotate: rotate (45.0, 1, 0, 0), translate: translate (0, 0, size * 1.25)}));
+		self.figure.append (Node (m, rectangle, null, null));
 		ID++;
 		
 		//#mainframe cockpit start
-		var m = Transform (__kwargtrans__ ({translate: translate (0, 0, (size * 3) / 2), rotate: rotate (90.0, 0, 1, 0), scale: mult (scale (1, 0.5, 1), mat4invert (m.scale))}));
+		var m = Transform (__kwargtrans__ ({translate: translate (0, 0, size * 1.35), rotate: rotate (90.0, 0, 1, 0), scale: mult (scale (1, 0.5, 0.999), mat4invert (scale (0.5, 1, 2.5)))}));
 		self.figure.append (Node (m, cylinder, null, ID + 1));
 		ID++;
-		var m = Transform (__kwargtrans__ ({rotate: rotate (50.0, 0, 0, 1), scale: scale (0.8, 1, 1), translate: translate (0, ((-(cy_r) * 1) / 2) * 0.45, ((cy_r * 1) / 2) * 1.15)}));
+		var m = Transform (__kwargtrans__ ({rotate: rotate (50.0, 0, 0, 1), scale: scale (0.8, 1, 0.999), translate: translate (0, ((-(cy_r) * 1) / 2) * 0.45, ((cy_r * 1) / 2) * 1.15)}));
 		self.figure.append (Node (m, cylinder, null, ID + 1));
 		ID++;
-		var m = Transform (__kwargtrans__ ({rotate: rotate (20.0, 0, 0, 1), translate: translate (0, (-(cy_r) * 1) / 4, (cy_r * 1) / 4)}));
-		self.figure.append (Node (m, cylinder, null, ID + 1));
+		var m = Transform (__kwargtrans__ ({rotate: rotate (20.0, 0, 0, 1), translate: translate (0, (-(cy_r) * 1) / 4, (cy_r * 1) / 4), scale: scale (1, 1, 1.01)}));
+		self.figure.append (Node (m, cylinder, ID + 1, ID + 2));
+		ID++;
+		var m = Transform (__kwargtrans__ ({rotate: rotate (-(30.0), 0, 0, 1), scale: scale (0.5, 0.5, 0.999), translate: translate (0, 4.5, 0)}));
+		self.figure.append (Node (m, cockpit_glass, null, null));
 		ID++;
 		//#mainframe cockpit end
 		        
 		//#front
-		var m = Transform (__kwargtrans__ ({rotate: rotate (-(80.0), 0, 0, 1), scale: scale (0.5, 0.5, 0.98), translate: translate (0, -(cy_heigth) * 1.1, cy_heigth * 0.8)}));
+		var m = Transform (__kwargtrans__ ({rotate: rotate (-(80.0), 0, 0, 1), scale: scale (0.5, 0.5, 1.01), translate: translate (0, -(cy_heigth) * 1.15, cy_heigth * 0.8)}));
 		self.figure.append (Node (m, front_cylinder, ID + 1, null));
 		ID++;
 		//#canon
@@ -385,67 +443,6 @@ export var FrontCannon =  __class__ ('FrontCannon', [Figure], {
 		ID++;
 		var m = Transform (__kwargtrans__ ({rotate: mult (rotate (180.0, 0, 0, 1), rotate (-(90.0), 0, 1, 0)), scale: scale ((3 / 4) * size, 1, 0.5), translate: translate (-(cy_r) / 2, cy_r / 4, -(cy_heigth) * 5)}));
 		self.figure.append (Node (m, tri_rect, null, null));
-		ID++;
-	});}
-});
-/**
-* L'extrémité d'un réacteur. Je n'ai pas réussi à terminer l'implémentation
-*/
-export var Reactor =  __class__ ('Reactor', [Figure], {
-	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self) {
-		__super__ (Reactor, '__init__') (self);
-		var size = 10.0;
-		var ID = 0;
-		var m = Transform ();
-		var generic_shape = self.generic_shape;
-		self.shapeList.append (createModel (cube (size)));
-		var render = function (transform) {
-			var initialModelView = modelview;
-			var scaleSafeMatrix = mult (self.transform.translate, transform.translate);
-			var scaleSafeMatrix = mult (scaleSafeMatrix, mult (self.transform.rotate, transform.rotate));
-			normalMatrix = extractNormalMatrix (mult (modelview, scaleSafeMatrix));
-			var instaceMatrix = mult (self.transform.multi, transform.multi);
-			var instanceMatrix = mult (instaceMatrix, scaleSafeMatrix);
-			var instanceMatrix = mult (instanceMatrix, transform.scale);
-			modelview = mult (modelview, instanceMatrix);
-			self.shapeList [0].render ();
-			modelview = initialModelView;
-		};
-		var sides = function () {
-			var transform = self.preTransformList [self.ids.nextId ()];
-			var sc = self.transform.scale_factor ();
-			transform.translate [0] [3] = transform.translate [0] [3] * sc.x;
-			transform.scale = mult (transfo.scale, scale (1, sc.y, 1));
-			self.transform.scale [0] [0] = 1;
-			self.transform.scale [1] [1] = 1;
-			render (transform);
-			self.transform.scale = scale (sc.x, sc.y, sc.z);
-		};
-		var topbot = function () {
-			var transform = self.preTransformList [self.ids.nextId ()];
-			var sc = self.transform.scale_factor ();
-			transform.translate [1] [3] = transform.translate [1] [3] * sc.y;
-			transform.scale = mult (transfo.scale, scale (sc.x, 1, 1));
-			self.transform.scale [0] [0] = 1;
-			self.transform.scale [1] [1] = 1;
-			render (transform);
-			self.transform.scale = scale (sc.x, sc.y, sc.z);
-		};
-		var transfo = Transform (__kwargtrans__ ({translate: translate ((size / 2) * 0.9, 0, 0), scale: scale (0.1, 1, 1)}));
-		self.figure.append (Node (m, sides, ID + 1, null));
-		ID++;
-		var transfo = Transform (__kwargtrans__ ({translate: translate (-((size / 2) * 0.9), 0, 0), scale: scale (0.1, 1, 1)}));
-		self.preTransformList.append (transfo);
-		self.figure.append (Node (m, sides, ID + 1, null));
-		ID++;
-		var transfo = Transform (__kwargtrans__ ({translate: translate (0, (size / 2) * 0.9, 0), scale: scale (1, 0.1, 1)}));
-		self.preTransformList.append (transfo);
-		self.figure.append (Node (m, topbot, ID + 1, null));
-		ID++;
-		var transfo = Transform (__kwargtrans__ ({translate: translate (0, -((size / 2) * 0.9), 0), scale: scale (1, 0.1, 1)}));
-		self.preTransformList.append (transfo);
-		self.figure.append (Node (m, topbot, null, null));
 		ID++;
 	});}
 });

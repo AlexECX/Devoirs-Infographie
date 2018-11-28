@@ -25,15 +25,6 @@ def init_webgl_inst():
         raise "Could not create WebGL context."
 
     gl.enable(gl.DEPTH_TEST)
-    
-    # canvas = document.getElementById("gl-canvas")
-    # gl = WebGLUtils.setupWebGL(canvas)
-    # if not gl:
-    #     alert("WebGL isn't available")
-
-    # gl.viewport(0, 0, canvas.width, canvas.height)
-    # gl.clearColor(1.0, 1.0, 1.0, 1.0)
-    # gl.enable(gl.DEPTH_TEST)
 
     return gl
 
@@ -43,3 +34,14 @@ def select_shaders(gl, *args):
     program = initShaders(gl, *args)
     gl.useProgram(program)
     return program
+
+
+__pragma__('js', '{}', """/**
+* Recursively converts an iterable implementing __iter__, and all __iter__
+* objects it contains, into bare array objects
+*/""")
+def js_list(iterable):
+    if hasattr(iterable, "__iter__"):
+        return [js_list(i) for i in iterable]  # __:opov
+    else:
+        return iterable

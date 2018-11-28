@@ -4,7 +4,6 @@ from javascript import document, Math   # __: skip
 
 from webgl_utils import webgl_render, clear_canvas, init_webgl_inst, select_shaders
 from shapes import SpaceShip, Transform
-from py_vector import Vector3D, Matrice4
 
 __pragma__('js', """/*
 The main module: 
@@ -14,84 +13,17 @@ The main module:
 */""")
 
 
-# gl = None
-# prog = None
-# # Location of the coords attribute variable in the standard texture mappping shader program.
-# CoordsLoc = None
-# NormalLoc = None
-# TexCoordLoc = None
-
-# # Location of the uniform variables in the standard texture mappping shader program.
-# ProjectionLoc = None
-# ModelviewLoc = None
-# NormalMatrixLoc = None
-
-
-# projection = None  # --- projection matrix
-# modelview = None   # modelview matrix
-# flattenedmodelview = None  # --- flattened modelview matrix
-
-# normalMatrix = mat3()  # --- create a 3X3 matrix that will affect normals
-
-# rotator = None   # A SimpleRotator object to enable rotation by mouse dragging.
-
-# trirec = None
-# sphere = None
-# cylinder = None
-# box = None
-# teapot = None
-# disk = None
-# torus = None
-# cone = None
-# hemisphereinside = None
-# hemisphereoutside = None
-# thindisk = None
-# quartersphereinside = None
-# quartersphereoutside = None
-# wing = None
-
-
-# lightPosition = vec4(20.0, 20.0, 100.0, 1.0)
-
-# lightAmbient = vec4(1.0, 1.0, 1.0, 1.0)
-# lightDiffuse = vec4(1.0, 1.0, 1.0, 1.0)
-# lightSpecular = vec4(1.0, 1.0, 1.0, 1.0)
-
-# materialAmbient = vec4(0.0, 0.1, 0.3, 1.0)
-# materialDiffuse = vec4(0.48, 0.55, 0.69, 1.0)
-# materialSpecular = vec4(0.48, 0.55, 0.69, 1.0)
-# materialShininess = 100.0
-
-# ambientProduct = None
-# diffuseProduct = None
-# specularProduct = None
-
-
-# __pragma__('js', '//color codes (rgb)')
-# BaseColors = [
-#     vec4(0.0, 0.0, 0.0, 1.0),  # black
-#     vec4(1.0, 0.0, 0.0, 1.0),  # red
-#     vec4(1.0, 1.0, 0.0, 1.0),  # yellow
-#     vec4(0.0, 1.0, 0.0, 1.0),  # green
-#     vec4(0.0, 0.0, 1.0, 1.0),  # blue
-#     vec4(1.0, 0.0, 1.0, 1.0),  # magenta
-#     vec4(0.0, 1.0, 1.0, 1.0),  # cyan
-#     vec4(1.0, 1.0, 1.0, 1.0),  # white
-# ]
-
-
-__pragma__('js', '{}', """\n//This is the main 3D function""")
+__pragma__('js', '{}', """\n//This is the main function""")
 
 
 def draw():
-    global gl, prog, rotator
-    global trirec, sphere, cylinder, box, teapot, disk, torus, cone,  \
-        hemisphereinside, hemisphereoutside, thindisk, \
-        quartersphereinside, quartersphereoutside, wing, spaceship
+    global gl, prog
+    global trirec, sphere, cylinder, box,  spaceship
     global ambientProduct, diffuseProduct, specularProduct
     global CoordsLoc, NormalLoc, TexCoordLoc, ProjectionLoc, ModelviewLoc, \
         NormalMatrixLoc, projection, modelview, flattenedmodelview, \
-        normalMatrix, rotator
+        normalMatrix, rotator, alphaLoc
+    global textureList
 
     __pragma__('js', '//init')
     gl = init_webgl_inst()
@@ -110,6 +42,8 @@ def draw():
     CoordsLoc = gl.getAttribLocation(prog, "vcoords")
     NormalLoc = gl.getAttribLocation(prog, "vnormal")
     TexCoordLoc = gl.getAttribLocation(prog, "vtexcoord")
+    alphaLoc = gl.getUniformLocation(prog, "alpha")
+    gl.uniform1f(alphaLoc, alpha)
 
     ModelviewLoc = gl.getUniformLocation(prog, "modelview")
     ProjectionLoc = gl.getUniformLocation(prog, "projection")
@@ -117,8 +51,7 @@ def draw():
 
     gl.enableVertexAttribArray(CoordsLoc)
     gl.enableVertexAttribArray(NormalLoc)
-    # we do not need texture coordinates
-    gl.disableVertexAttribArray(TexCoordLoc)
+    gl.enableVertexAttribArray(TexCoordLoc)
 
     #  create a "rotator" monitoring mouse mouvement
     rotator = __new__(SimpleRotator(canvas, render))
@@ -146,49 +79,74 @@ def draw():
     # send projection matrix to the shader program
     gl.uniformMatrix4fv(ProjectionLoc, False, flatten(projection))
 
-    # In the following lines, we create different "elements" (sphere, cylinder, box, disk,...).
-    # These elements are "objects" returned by the "createModel()" function.
-    # The "createModel()" function requires one parameter which contains all the information needed
-    # to create the "object". The functions "uvSphere()", "uvCylinder()", "cube()",... are described
-    # in the file "basic-objects-IFS.js". They return an "object" containing vertices, normals,
-    # texture coordinates and indices.
-    #
-
-    # sphere = createModel(uvSphere(10.0, 25.0, 25.0))
-    # cylinder = createModel(uvCylinder(10.0, 20.0, 25.0, False, False))
-    #trirec = createModel(triangle_rectangle(10.0))
     spaceship = SpaceShip()
-    box = createModel(empty_cube(10.0, 2.0))
+    #box = createModel(empty_cube(10.0, 2.0))
+    box = createModel(cube(10.0))
 
-    # teapot = createModel(teapotModel)
-    # disk = createModel(ring(5.0, 10.0, 25.0))
-    # torus = createModel(uvTorus(15.0, 5.0, 25.0, 25.0))
-    # cone = createModel(uvCone(10.0, 20.0, 25.0, True))
-
-    # hemisphereinside = createModel(uvHemisphereInside(10.0, 25.0, 25.0))
-    # hemisphereoutside = createModel(uvHemisphereOutside(10.0, 25.0, 25.0))
-    # thindisk = createModel(ring(9.5, 10.0, 25.0))
-
-    # quartersphereinside = createModel(uvQuartersphereInside(10.0, 25.0, 25.0))
-    # quartersphereoutside = createModel(uvQuartersphereOutside(10.0, 25.0, 25.0))
+    __pragma__('js', '{}', """//preparation textures""")
+    textureList = []
+    textureList.append(initTexture("img/text1.jpg", handleLoadedTexture))
+    textureList.append(initTexture("img/text3.jpg", handleLoadedTexture))
+    textureList.append(initTexture("img/text5.jpg", handleLoadedTexture))
+    textureList.append(initTexture("img/textCanon.jpg", handleLoadedTexture))
+    textureList.append(initTexture("img/textCanon2.jpg", handleLoadedTexture))
+    textureList.append(initTexture("img/textCanon3.jpg", handleLoadedTexture))
+    textureList.append(initTexture("img/textBlanc.jpg", handleLoadedTexture))
+    textureList.append(initTexture("img/textCockpitGlass.jpg", handleLoadedTexture))
 
     # managing arrow keys (to move up or down the model)
-    __pragma__('js', """ 
-    document.onkeydown = function (e) {
-        switch (e.key) {
-            case 'Home':
-                # resize the canvas to the current window width and height
-                resize(canvas)
-                break
-        };
+    __pragma__('js','{}', """ 
+document.onkeydown = function (e) {
+    switch (e.key) {
+        case 'Home':
+            //resize the canvas to the current window width and height
+            resize(canvas)
+            break
     };
+};
+document.getElementById("Cloak").onclick = invisible;
+
     """)
+    render()
+
+
+def invisible():
+    global alpha
+    if alpha == 0.01:
+        alpha = 1.0
+        gl.uniform1f(alphaLoc, alpha)
+        gl.disable(gl.BLEND)
+        gl.depthMask(True)
+    elif alpha == 1.0:
+        alpha = 0.01
+        gl.uniform1f(alphaLoc, alpha)
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+        gl.enable(gl.BLEND)
+        gl.depthMask(False)
 
     render()
 
 
+def handleLoadedTexture(texture):
+    global ntextures_loaded
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, True)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+                  gl.UNSIGNED_BYTE, texture.image)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+
+    ntextures_loaded += 1
+
+    render()  # Call render function when the image has been loaded (to make sure the model is displayed)
+
+    gl.bindTexture(gl.TEXTURE_2D, None)
+
+
 def render():
-    global flattenedmodelview, modelview, normalMatrix
+    global flattenedmodelview, modelview, normalMatrix, ntextures_loaded,\
+        ntextures_tobeloaded
+
     gl.clearColor(0.79, 0.76, 0.27, 1)
     clear_canvas(gl)
 
@@ -199,23 +157,16 @@ def render():
     flattenedmodelview = rotator.getViewMatrix()
     modelview = unflatten(flattenedmodelview)
     initialModelView = modelview
-    # normalMatrix = extractNormalMatrix(modelview)
+    normalMatrix = extractNormalMatrix(modelview)
     # modelview = mult(modelview, scale(1, 4, .5))
     # box.render()
     spaceship.transform = Transform()
-    #spaceship.transform.multi = scale(.25,.25,.25)
-    spaceship.traverse()
-    
+    spaceship.transform.multi = scale(.80, .80, .80)
+    # spaceship.traverse()
+
+    # if texture image has been loaded
+    if ntextures_loaded == len(textureList):
+
+        spaceship.traverse()
+
     modelview = initialModelView
-
-
-__pragma__('js', '{}', """
-//Recursively converts an iterable implementing __iter__, and all __iter__
-//objects it contains, into bare list objects""")
-
-
-def js_list(iterable):
-    if hasattr(iterable, "__iter__"):
-        return [js_list(i) for i in iterable]  # __:opov
-    else:
-        return iterable

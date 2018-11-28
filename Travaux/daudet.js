@@ -189,3 +189,16 @@ function resize(canvas) {  // ref. https://webglfundamentals.org/webgl/lessons/w
 	gl.viewport(0, 0, canvas.width, canvas.height);
 
 }
+
+
+function initTexture(path, onload) {
+    var texture = gl.createTexture();
+
+    texture.image = new Image();
+    texture.image.onload = function (){
+        onload(texture);
+    };
+
+    texture.image.src = path;
+    return texture;
+}
