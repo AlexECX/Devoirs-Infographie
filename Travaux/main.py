@@ -43,7 +43,6 @@ def draw():
     NormalLoc = gl.getAttribLocation(prog, "vnormal")
     TexCoordLoc = gl.getAttribLocation(prog, "vtexcoord")
     alphaLoc = gl.getUniformLocation(prog, "alpha")
-    gl.uniform1f(alphaLoc, alpha)
 
     ModelviewLoc = gl.getUniformLocation(prog, "modelview")
     ProjectionLoc = gl.getUniformLocation(prog, "projection")
@@ -57,7 +56,7 @@ def draw():
     rotator = __new__(SimpleRotator(canvas, render))
     #  set initial camera position at z=40, with an "up" vector aligned with y axis
     #   (this defines the initial value of the modelview matrix )
-    rotator.setView([0, 0, 1], [0, 1, 0], 60)
+    rotator.setView([.3, .2, .5], [0, 1.0, 0], 60)
 
     ambientProduct = mult(lightAmbient, materialAmbient)
     diffuseProduct = mult(lightDiffuse, materialDiffuse)
@@ -92,10 +91,11 @@ def draw():
     textureList.append(initTexture("img/textCanon2.jpg", handleLoadedTexture))
     textureList.append(initTexture("img/textCanon3.jpg", handleLoadedTexture))
     textureList.append(initTexture("img/textBlanc.jpg", handleLoadedTexture))
-    textureList.append(initTexture("img/textCockpitGlass.jpg", handleLoadedTexture))
+    textureList.append(initTexture(
+        "img/textCockpitGlass.jpg", handleLoadedTexture))
 
     # managing arrow keys (to move up or down the model)
-    __pragma__('js','{}', """ 
+    __pragma__('js', '{}', """ 
 document.onkeydown = function (e) {
     switch (e.key) {
         case 'Home':
@@ -107,24 +107,91 @@ document.onkeydown = function (e) {
 document.getElementById("Cloak").onclick = invisible;
 
     """)
+    gl.uniform1f(alphaLoc, alpha)
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+    gl.enable(gl.BLEND)
+    gl.depthMask(False)
+    setTimeout(invisible, 2000)
     render()
+
+# def cloak():
+#     global invisibility_timeout
+#     window.clearTimeout(invisibility_timeout)
+#     v = setTimeout(invisible, 2)
 
 
 def invisible():
     global alpha
-    if alpha == 0.01:
-        alpha = 1.0
-        gl.uniform1f(alphaLoc, alpha)
-        gl.disable(gl.BLEND)
-        gl.depthMask(True)
-    elif alpha == 1.0:
-        alpha = 0.01
-        gl.uniform1f(alphaLoc, alpha)
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-        gl.enable(gl.BLEND)
-        gl.depthMask(False)
 
-    render()
+    if alpha == 0.01:
+        alpha = 0.011
+        setTimeout(__pragma__('js', '{}', """function() {
+            alpha = 0.05;
+            gl.uniform1f(alphaLoc, alpha);
+            render();
+        }"""), 100)
+        setTimeout(__pragma__('js', '{}', """function() {
+            alpha = 0.1;
+            gl.uniform1f(alphaLoc, alpha);
+            render();
+        }"""), 200)
+        setTimeout(__pragma__('js', '{}', """function() {
+            alpha = 0.3;
+            gl.uniform1f(alphaLoc, alpha);
+            render();
+        }"""), 300)
+        setTimeout(__pragma__('js', '{}', """function() {
+            alpha = 0.5;
+            gl.uniform1f(alphaLoc, alpha);
+            render();
+        }"""), 400)
+        setTimeout(__pragma__('js', '{}', """function() {
+            alpha = 0.8;
+            gl.uniform1f(alphaLoc, alpha);
+            render();
+        }"""), 500)
+        setTimeout(__pragma__('js', '{}', """function() {
+            alpha = 1.0;
+            gl.uniform1f(alphaLoc, alpha);
+            gl.disable(gl.BLEND);
+            gl.depthMask(true);
+            render();
+        }"""), 600)
+    elif alpha == 1.0:
+        alpha = 0.99
+        setTimeout(__pragma__('js', '{}', """function() {
+            alpha = 0.8;
+            gl.uniform1f(alphaLoc, alpha);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            gl.enable(gl.BLEND);
+            gl.depthMask(false);
+            render();
+        }"""), 100)
+        setTimeout(__pragma__('js', '{}', """function() {
+            alpha = 0.5;
+            gl.uniform1f(alphaLoc, alpha);
+            render();
+        }"""), 200)
+        setTimeout(__pragma__('js', '{}', """function() {
+            alpha = 0.3;
+            gl.uniform1f(alphaLoc, alpha);
+            render();
+        }"""), 300)
+        setTimeout(__pragma__('js', '{}', """function() {
+            alpha = 0.1;
+            gl.uniform1f(alphaLoc, alpha);
+            render();
+        }"""), 400)
+        setTimeout(__pragma__('js', '{}', """function() {
+            alpha = 0.05;
+            gl.uniform1f(alphaLoc, alpha);
+            render();
+        }"""), 500)
+        setTimeout(__pragma__('js', '{}', """function() {
+            alpha = 0.01;
+            gl.uniform1f(alphaLoc, alpha);
+            render();
+        }"""), 600)
 
 
 def handleLoadedTexture(texture):

@@ -4,6 +4,7 @@
 
 var gl = null;
 var prog = null;
+var invisibility_timeout = null;
 //Location of the coords attribute variable in the standard texture mappping shader program.
 var CoordsLoc = null;
 var NormalLoc = null;
@@ -40,7 +41,7 @@ var materialShininess = 100.0;
 var ambientProduct = null;
 var diffuseProduct = null;
 var specularProduct = null;
-var alpha = 1.0;
+var alpha = 0.01;
 //color codes (rgb)
 //var BaseColors = list ([vec4 (0.0, 0.0, 0.0, 1.0), vec4 (1.0, 0.0, 0.0, 1.0), vec4 (1.0, 1.0, 0.0, 1.0), vec4 (0.0, 1.0, 0.0, 1.0), vec4 (0.0, 0.0, 1.0, 1.0), vec4 (1.0, 0.0, 1.0, 1.0), vec4 (0.0, 1.0, 1.0, 1.0), vec4 (1.0, 1.0, 1.0, 1.0)]);
 var ntextures_loaded = 0;

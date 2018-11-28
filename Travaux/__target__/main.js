@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-11-27 22:08:56
+// Transcrypt'ed from Python, 2018-11-28 00:14:25
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {SpaceShip, Transform} from './shapes.js';
 import {clear_canvas, init_webgl_inst, select_shaders, webgl_render} from './webgl_utils.js';
@@ -24,7 +24,6 @@ export var draw = function () {
 	NormalLoc = gl.getAttribLocation (prog, 'vnormal');
 	TexCoordLoc = gl.getAttribLocation (prog, 'vtexcoord');
 	alphaLoc = gl.getUniformLocation (prog, 'alpha');
-	gl.uniform1f (alphaLoc, alpha);
 	ModelviewLoc = gl.getUniformLocation (prog, 'modelview');
 	ProjectionLoc = gl.getUniformLocation (prog, 'projection');
 	NormalMatrixLoc = gl.getUniformLocation (prog, 'normalMatrix');
@@ -32,7 +31,7 @@ export var draw = function () {
 	gl.enableVertexAttribArray (NormalLoc);
 	gl.enableVertexAttribArray (TexCoordLoc);
 	rotator = new SimpleRotator (canvas, render);
-	rotator.setView (list ([0, 0, 1]), list ([0, 1, 0]), 60);
+	rotator.setView (list ([0.3, 0.2, 0.5]), list ([0, 1.0, 0]), 60);
 	ambientProduct = mult (lightAmbient, materialAmbient);
 	diffuseProduct = mult (lightDiffuse, materialDiffuse);
 	specularProduct = mult (lightSpecular, materialSpecular);
@@ -67,23 +66,97 @@ export var draw = function () {
 	document.getElementById("Cloak").onclick = invisible;
 	
 	    
+	gl.uniform1f (alphaLoc, alpha);
+	gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	gl.enable (gl.BLEND);
+	gl.depthMask (false);
+	setTimeout (invisible, 2000);
 	render ();
 };
 export var invisible = function () {
 	if (alpha == 0.01) {
-		alpha = 1.0;
-		gl.uniform1f (alphaLoc, alpha);
-		gl.disable (gl.BLEND);
-		gl.depthMask (true);
+		alpha = 0.011;
+		setTimeout (function() {
+		            alpha = 0.05;
+		            gl.uniform1f(alphaLoc, alpha);
+		            render();
+		        }
+		, 100);
+		setTimeout (function() {
+		            alpha = 0.1;
+		            gl.uniform1f(alphaLoc, alpha);
+		            render();
+		        }
+		, 200);
+		setTimeout (function() {
+		            alpha = 0.3;
+		            gl.uniform1f(alphaLoc, alpha);
+		            render();
+		        }
+		, 300);
+		setTimeout (function() {
+		            alpha = 0.5;
+		            gl.uniform1f(alphaLoc, alpha);
+		            render();
+		        }
+		, 400);
+		setTimeout (function() {
+		            alpha = 0.8;
+		            gl.uniform1f(alphaLoc, alpha);
+		            render();
+		        }
+		, 500);
+		setTimeout (function() {
+		            alpha = 1.0;
+		            gl.uniform1f(alphaLoc, alpha);
+		            gl.disable(gl.BLEND);
+		            gl.depthMask(true);
+		            render();
+		        }
+		, 600);
 	}
 	else if (alpha == 1.0) {
-		alpha = 0.01;
-		gl.uniform1f (alphaLoc, alpha);
-		gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		gl.enable (gl.BLEND);
-		gl.depthMask (false);
+		alpha = 0.99;
+		setTimeout (function() {
+		            alpha = 0.8;
+		            gl.uniform1f(alphaLoc, alpha);
+		            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+		            gl.enable(gl.BLEND);
+		            gl.depthMask(false);
+		            render();
+		        }
+		, 100);
+		setTimeout (function() {
+		            alpha = 0.5;
+		            gl.uniform1f(alphaLoc, alpha);
+		            render();
+		        }
+		, 200);
+		setTimeout (function() {
+		            alpha = 0.3;
+		            gl.uniform1f(alphaLoc, alpha);
+		            render();
+		        }
+		, 300);
+		setTimeout (function() {
+		            alpha = 0.1;
+		            gl.uniform1f(alphaLoc, alpha);
+		            render();
+		        }
+		, 400);
+		setTimeout (function() {
+		            alpha = 0.05;
+		            gl.uniform1f(alphaLoc, alpha);
+		            render();
+		        }
+		, 500);
+		setTimeout (function() {
+		            alpha = 0.01;
+		            gl.uniform1f(alphaLoc, alpha);
+		            render();
+		        }
+		, 600);
 	}
-	render ();
 };
 export var handleLoadedTexture = function (texture) {
 	gl.bindTexture (gl.TEXTURE_2D, texture);
