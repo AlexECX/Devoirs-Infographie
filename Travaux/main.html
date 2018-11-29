@@ -87,13 +87,17 @@
         Color = ambient + diffuse + specular;
         Color.a = 1.0;
 
-        //if (selector == 0) {
-        //    gl_FragColor = textureCube(skybox, fCoords);
-        //}
-        //else {
-        vec4 c = Color * texture2D( texture, fTexCoord );
-        gl_FragColor = vec4(c.rgb, c.a * alpha);
-        //}
+
+        if (f == 0) 
+        {
+            gl_FragColor = textureCube(skybox, fCoords);
+            //gl_FragColor = Color;
+        }
+        else 
+        {
+            vec4 c = Color * texture2D( texture, fTexCoord );
+            gl_FragColor = vec4(c.rgb, c.a * alpha);
+        }
 
     }
 </script>

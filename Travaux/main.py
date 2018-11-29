@@ -79,7 +79,7 @@ def draw():
     gl.uniformMatrix4fv(ProjectionLoc, False, flatten(projection))
 
     spaceship = SpaceShip()
-    envbox = Skybox(1000.0, Mipmap(gl, envImgPaths))
+    envbox = Skybox(1999.0, Mipmap(gl, envImgPaths))
     mars = Mars()
     #box = createModel(empty_cube(10.0, 2.0))
     #box = createModel(cube(10.0))
@@ -113,7 +113,8 @@ document.getElementById("Cloak").onclick = invisible;
     # gl.enable(gl.BLEND)
     # gl.depthMask(False)
     # setTimeout(invisible, 1500)
-    setInterval(render, 50)
+    #setInterval(render, 50)
+    render()
 
 
 def invisible():
@@ -247,22 +248,21 @@ def render():
     if (all([t.isloaded for t in textureList])
         and envbox.isloaded()):
 
-        # gl.uniform1i(gl.getUniformLocation(prog, "selector"), 1)
-        # gl.enableVertexAttribArray(CoordsLoc)
-        # gl.disableVertexAttribArray(NormalLoc)
-        # gl.disableVertexAttribArray(TexCoordLoc)
-        # envbox.render()
-        # gl.enableVertexAttribArray(CoordsLoc)
-        #gl.uniform1f(gl.getUniformLocation(prog, "selector"), 1.0)
+        gl.uniform1i(gl.getUniformLocation(prog, "selector"), 0)
         gl.enableVertexAttribArray(CoordsLoc)
+        gl.disableVertexAttribArray(NormalLoc)
+        gl.disableVertexAttribArray(TexCoordLoc)
+        envbox.render()
+
+       # gl.uniform1i(gl.getUniformLocation(prog, "selector"), 1)
         gl.enableVertexAttribArray(NormalLoc)
         gl.enableVertexAttribArray(TexCoordLoc)
 
         # gl.enableVertexAttribArray(CoordsLoc)
         # gl.enableVertexAttribArray(NormalLoc)
         # gl.enableVertexAttribArray(TexCoordLoc)
-        spaceship.traverse()
-        mars.traverse()
+        #spaceship.traverse()
+        #mars.traverse()
 
     #modelview = initialModelView
 

@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-11-29 12:54:42
+// Transcrypt'ed from Python, 2018-11-29 13:54:52
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Mars} from './planets.js';
 import {Mipmap, Skybox, Texture2D} from './textures.js';
@@ -42,7 +42,7 @@ export var draw = function () {
 	projection = perspective (60.0, 1.0, 1.0, 2000.0);
 	gl.uniformMatrix4fv (ProjectionLoc, false, flatten (projection));
 	spaceship = SpaceShip ();
-	envbox = Skybox (1000.0, Mipmap (gl, envImgPaths));
+	envbox = Skybox (1999.0, Mipmap (gl, envImgPaths));
 	mars = Mars ();
 	//preparation textures
 	textureList = list ([]);
@@ -67,7 +67,7 @@ export var draw = function () {
 	
 	    
 	gl.uniform1f (alphaLoc, alpha);
-	setInterval (render, 50);
+	render ();
 };
 export var invisible = function () {
 	if (alpha == 0.01) {
@@ -191,11 +191,13 @@ export var render = function () {
 		}
 		return __accu0__;
 	}) ()) && envbox.isloaded ()) {
+		gl.uniform1i (gl.getUniformLocation (prog, 'selector'), 0);
 		gl.enableVertexAttribArray (CoordsLoc);
+		gl.disableVertexAttribArray (NormalLoc);
+		gl.disableVertexAttribArray (TexCoordLoc);
+		envbox.render ();
 		gl.enableVertexAttribArray (NormalLoc);
 		gl.enableVertexAttribArray (TexCoordLoc);
-		spaceship.traverse ();
-		mars.traverse ();
 	}
 };
 
