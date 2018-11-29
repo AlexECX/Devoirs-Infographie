@@ -8,7 +8,7 @@ __pragma__('js', '{}', """/**
 def set_texture(index):
     global gl, prog, textureList
     gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, textureList[index])
+    gl.bindTexture(gl.TEXTURE_2D, textureList[index].texture)
 
     # Send texture to sampler
     gl.uniform1i(gl.getUniformLocation(prog, "texture"), 0)
@@ -21,6 +21,37 @@ def set_mipmap(mipmap):
     gl.uniform1i(gl.getUniformLocation(prog, "skybox"), 0)
 
 
+class Texture2D:
+    
+    def __init__(self, gl, path):
+        self.gl = gl
+        self.isloaded = False
+        self.img = None
+        self.loadedTextures = 0
+        self.texture = gl.createTexture()
+        
+        self.img = __new__(Image())
+        self.img.onload = __pragma__(
+            'js', '{}', """function () { self.handleLoadedTexture2D(self.texture) }""")
+        self.img.src = path
+
+    def handleLoadedTexture2D(self, texture):
+        gl = self.gl
+        gl.bindTexture(gl.TEXTURE_2D, texture)
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, True)
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+                    gl.UNSIGNED_BYTE, self.img)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+        
+        self.isloaded = True
+        self.loadedTextures += 1
+
+        render()  # Call render function when the image has been loaded (to make sure the model is displayed)
+
+        gl.bindTexture(gl.TEXTURE_2D, None)
+
+
 class Mipmap:
 
     def __init__(self, gl, paths):
@@ -30,6 +61,7 @@ class Mipmap:
         self.map_size = len(paths)
         self.loadedTextures = 0
         self.texture = gl.createTexture()
+        
         for path in paths:
             img = __new__(Image())
             img.onload = __pragma__(
@@ -63,6 +95,7 @@ class Mipmap:
             render()
 
             gl.bindTexture(gl.TEXTURE_2D, None)
+
 
 class Skybox:
     
