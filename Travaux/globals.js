@@ -14,6 +14,7 @@ var alphaLoc = null;
 var ProjectionLoc = null;
 var ModelviewLoc = null;
 var NormalMatrixLoc = null;
+var skyboxLoc = null;
 //# --- projection matrix
 var projection = null;
 //# modelview matrix
@@ -41,9 +42,22 @@ var materialShininess = 100.0;
 var ambientProduct = null;
 var diffuseProduct = null;
 var specularProduct = null;
-var alpha = 0.01;
+var alpha = 1.0;
 //color codes (rgb)
 //var BaseColors = list ([vec4 (0.0, 0.0, 0.0, 1.0), vec4 (1.0, 0.0, 0.0, 1.0), vec4 (1.0, 1.0, 0.0, 1.0), vec4 (0.0, 1.0, 0.0, 1.0), vec4 (0.0, 0.0, 1.0, 1.0), vec4 (1.0, 0.0, 1.0, 1.0), vec4 (0.0, 1.0, 1.0, 1.0), vec4 (1.0, 1.0, 1.0, 1.0)]);
 var ntextures_loaded = 0;
-var ntextures_tobeloaded = 2;
+var ntextures_map_loaded = 0;
 var textureList;
+var envbox;
+var envImgPaths = [
+    "img/nebula_posx.png", "img/nebula_negx.png",
+    "img/nebula_posy.png", "img/nebula_negy.png",
+    "img/nebula_posz.png", "img/nebula_negz.png"
+ ];
+var envTexture;
+
+
+var texIDmap0;  // environmental texture identifier
+var texID1, texID2, texID3, texID4;  // standard texture identifiers
+var ct = 0;
+var img = new Array(6);
