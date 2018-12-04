@@ -1,4 +1,4 @@
-// Transcrypt'ed from Python, 2018-11-29 00:04:41
+// Transcrypt'ed from Python, 2018-12-04 15:16:17
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Mipmap, Skybox} from './textures.js';
 import {SpaceShip, Transform} from './shapes.js';
@@ -20,26 +20,33 @@ export var draw = function () {
 	var vertexShaderSource = getTextContent ('vshader');
 	var fragmentShaderSource = getTextContent ('fshader');
 	prog = createProgram (gl, vertexShaderSource, fragmentShaderSource);
-	gl.useProgram (prog);
+	prog_skybox = createProgram (gl, vertexShaderSource, getTextContent ('fshaderbox'));
 	CoordsLoc = gl.getAttribLocation (prog, 'vcoords');
 	NormalLoc = gl.getAttribLocation (prog, 'vnormal');
 	TexCoordLoc = gl.getAttribLocation (prog, 'vtexcoord');
-	alphaLoc = gl.getUniformLocation (prog, 'alpha');
 	ModelviewLoc = gl.getUniformLocation (prog, 'modelview');
 	ProjectionLoc = gl.getUniformLocation (prog, 'projection');
 	NormalMatrixLoc = gl.getUniformLocation (prog, 'normalMatrix');
-	rotator = new SimpleRotator (canvas, render);
-	rotator.setView (list ([0.3, 0.2, 0.5]), list ([0, 1.0, 0]), 60);
+	LigthPositionLoc = gl.getUniformLocation (prog_skybox, 'lightPosition');
+	alphaLoc = gl.getUniformLocation (prog, 'alpha');
+	TextureLoc = gl.getUniformLocation (prog, 'texture');
+	SkyBoxLoc = gl.getUniformLocation (prog_skybox, 'skybox');
 	ambientProduct = mult (lightAmbient, materialAmbient);
 	diffuseProduct = mult (lightDiffuse, materialDiffuse);
 	specularProduct = mult (lightSpecular, materialSpecular);
-	gl.uniform4fv (gl.getUniformLocation (prog, 'ambientProduct'), flatten (ambientProduct));
-	gl.uniform4fv (gl.getUniformLocation (prog, 'diffuseProduct'), flatten (diffuseProduct));
-	gl.uniform4fv (gl.getUniformLocation (prog, 'specularProduct'), flatten (specularProduct));
-	gl.uniform1f (gl.getUniformLocation (prog, 'shininess'), materialShininess);
-	gl.uniform4fv (gl.getUniformLocation (prog, 'lightPosition'), flatten (lightPosition));
 	projection = perspective (60.0, 1.0, 1.0, 2000.0);
+	//initialise general program
+	gl.useProgram (prog);
+	gl.uniform1f (alphaLoc, alpha);
+	gl.uniform1f (gl.getUniformLocation (prog, 'shininess'), materialShininess);
+	gl.uniform4fv (LigthPositionLoc, flatten (lightPosition));
 	gl.uniformMatrix4fv (ProjectionLoc, false, flatten (projection));
+	//initialise skybox program
+	gl.useProgram (prog_skybox);
+	gl.uniform4fv (LigthPositionLoc, flatten (lightPosition));
+	gl.uniformMatrix4fv (ProjectionLoc, false, flatten (projection));
+	rotator = new SimpleRotator (canvas, render);
+	rotator.setView (list ([0.3, 0.2, 0.5]), list ([0, 1.0, 0]), 60);
 	spaceship = SpaceShip ();
 	envbox = Skybox (1000.0, Mipmap (gl, envImgPaths));
 	//preparation textures
@@ -64,7 +71,6 @@ export var draw = function () {
 	document.getElementById("Cloak").onclick = invisible;
 	
 	    
-	gl.uniform1f (alphaLoc, alpha);
 	render ();
 };
 export var invisible = function () {
@@ -180,13 +186,12 @@ export var render = function () {
 	spaceship.transform = Transform ();
 	spaceship.transform.multi = scale (0.8, 0.8, 0.8);
 	if (ntextures_loaded == len (textureList) && envbox.isloaded ()) {
-		gl.uniform1i (gl.getUniformLocation (prog, 'selector'), 1);
-		gl.enableVertexAttribArray (CoordsLoc);
-		gl.disableVertexAttribArray (NormalLoc);
-		gl.disableVertexAttribArray (TexCoordLoc);
-		envbox.render ();
+		gl.useProgram (prog_skybox);
+		gl.useProgram (prog);
 		gl.enableVertexAttribArray (NormalLoc);
 		gl.enableVertexAttribArray (TexCoordLoc);
+		gl.enableVertexAttribArray (CoordsLoc);
+		spaceship.traverse ();
 	}
 };
 

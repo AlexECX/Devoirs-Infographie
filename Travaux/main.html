@@ -64,9 +64,7 @@
      varying vec2 fTexCoord;
 
      uniform sampler2D texture;
-     uniform samplerCube skybox;
      uniform float alpha;
-     uniform int selector;
 
      void main() {
 
@@ -87,16 +85,24 @@
           Color = ambient + diffuse + specular;
           Color.a = 1.0;
 
-          if (selector == 0) {
-              gl_FragColor = textureCube(skybox, fCoords);
-          }
-          else {
-                vec4 c = Color * texture2D( texture, fTexCoord );
-                gl_FragColor = vec4(c.rgb, c.a * alpha);
-          }
+        vec4 c = Color * texture2D( texture, fTexCoord );
+        gl_FragColor = vec4(c.rgb, c.a * alpha);
 
      }
 </script>
+
+<script type="x-shader/x-fragment" id="fshaderbox">
+     precision mediump float;
+
+     varying vec3 fCoords;
+
+     uniform samplerCube skybox;
+
+     void main() {
+          gl_FragColor = textureCube(skybox, fCoords);
+     }
+</script>
+
 
 
 

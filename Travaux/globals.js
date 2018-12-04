@@ -4,17 +4,23 @@
 
 var gl = null;
 var prog = null;
+var prog_skybox = null;
 var invisibility_timeout = null;
 //Location of the coords attribute variable in the standard texture mappping shader program.
 var CoordsLoc = null;
 var NormalLoc = null;
 var TexCoordLoc = null;
-var alphaLoc = null;
 //Location of the uniform variables in the standard texture mappping shader program.
 var ProjectionLoc = null;
 var ModelviewLoc = null;
 var NormalMatrixLoc = null;
-var skyboxLoc = null;
+var LigthPositionLoc = null;
+//Location of the uniform variables in the Phong+texture fragment shader.
+var alphaLoc = null;
+var TextureLoc = null;
+
+var SkyBoxLoc = null;
+var alphaLoc = null;
 //# --- projection matrix
 var projection = null;
 //# modelview matrix

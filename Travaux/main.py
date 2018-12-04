@@ -18,12 +18,12 @@ __pragma__('js', '{}', """\n//This is the main function""")
 
 
 def draw():
-    global gl, prog
+    global gl, prog, prog_skybox
     global trirec, sphere, cylinder, box,  spaceship
     global ambientProduct, diffuseProduct, specularProduct
     global CoordsLoc, NormalLoc, TexCoordLoc, ProjectionLoc, ModelviewLoc, \
         NormalMatrixLoc, projection, modelview, flattenedmodelview, \
-        normalMatrix, rotator, alphaLoc
+        normalMatrix, rotator, alphaLoc, TextureLoc, SkyBoxLoc, LigthPositionLoc
     global textureList, envTexture, envbox
 
     __pragma__('js', '//init')
@@ -36,46 +36,62 @@ def draw():
     vertexShaderSource = getTextContent("vshader")
     fragmentShaderSource = getTextContent("fshader")
     prog = createProgram(gl, vertexShaderSource, fragmentShaderSource)
-
-    gl.useProgram(prog)
-
-    # locate variables for further use
+    prog_skybox = createProgram(gl, vertexShaderSource, getTextContent("fshaderbox"))
+    
+    # locate variables for vertex shaders
     CoordsLoc = gl.getAttribLocation(prog, "vcoords")
     NormalLoc = gl.getAttribLocation(prog, "vnormal")
     TexCoordLoc = gl.getAttribLocation(prog, "vtexcoord")
+    # general vertex shader uniforms
+    prog.ModelviewLoc = gl.getUniformLocation(prog, "modelview")
+    prog.ProjectionLoc = gl.getUniformLocation(prog, "projection")
+    prog.NormalMatrixLoc = gl.getUniformLocation(prog, "normalMatrix")
+    prog.LigthPositionLoc = gl.getUniformLocation(prog, "lightPosition")
+    # skybox vertex shader uniforms
+    prog_skybox.ModelviewLoc = gl.getUniformLocation(prog, "modelview")
+    prog_skybox.ProjectionLoc = gl.getUniformLocation(prog, "projection")
+    prog_skybox.NormalMatrixLoc = gl.getUniformLocation(prog, "normalMatrix")
+    prog_skybox.LigthPositionLoc = gl.getUniformLocation(prog, "lightPosition")
+    
+    # locate variables for the Phong+texture fragment shaders
     alphaLoc = gl.getUniformLocation(prog, "alpha")
+    TextureLoc = gl.getUniformLocation(prog, "texture")
+    # locate variables for the skybox fragment shaders
+    SkyBoxLoc = gl.getUniformLocation(prog_skybox, "skybox")
 
-    ModelviewLoc = gl.getUniformLocation(prog, "modelview")
-    ProjectionLoc = gl.getUniformLocation(prog, "projection")
-    NormalMatrixLoc = gl.getUniformLocation(prog, "normalMatrix")
+    ambientProduct = mult(lightAmbient, materialAmbient)
+    diffuseProduct = mult(lightDiffuse, materialDiffuse)
+    specularProduct = mult(lightSpecular, materialSpecular)
+
+    #projection = perspective(70.0, 1.0, 1.0, 200.0)
+    projection = perspective(60.0, 1.0, 1.0, 2000.0)
+
+    # gl.uniform4fv(gl.getUniformLocation(
+    #     prog, "ambientProduct"), flatten(ambientProduct))
+    # gl.uniform4fv(gl.getUniformLocation(
+    #     prog, "diffuseProduct"), flatten(diffuseProduct))
+    # gl.uniform4fv(gl.getUniformLocation(
+    #     prog, "specularProduct"), flatten(specularProduct))
+    __pragma__('js', '{}', """//initialise general program""")
+    gl.useProgram(prog)
+    gl.uniform1f(alphaLoc, alpha)
+    gl.uniform1f(gl.getUniformLocation(
+        prog, "shininess"), materialShininess)
+    gl.uniform4fv(prog.LigthPositionLoc, flatten(lightPosition))
+    # send projection matrix to the shader program
+    gl.uniformMatrix4fv(prog.ProjectionLoc, False, flatten(projection))
+
+    __pragma__('js', '{}', """//initialise skybox program""")
+    gl.useProgram(prog_skybox)
+    gl.uniform4fv(prog_skybox.LigthPositionLoc, flatten(lightPosition))
+    # send projection matrix to the shader program
+    gl.uniformMatrix4fv(prog_skybox.ProjectionLoc, False, flatten(projection))
 
     #  create a "rotator" monitoring mouse mouvement
     rotator = __new__(SimpleRotator(canvas, render))
     #  set initial camera position at z=40, with an "up" vector aligned with y axis
     #   (this defines the initial value of the modelview matrix )
     rotator.setView([.3, .2, .5], [0, 1.0, 0], 60)
-
-    ambientProduct = mult(lightAmbient, materialAmbient)
-    diffuseProduct = mult(lightDiffuse, materialDiffuse)
-    specularProduct = mult(lightSpecular, materialSpecular)
-
-    gl.uniform4fv(gl.getUniformLocation(
-        prog, "ambientProduct"), flatten(ambientProduct))
-    gl.uniform4fv(gl.getUniformLocation(
-        prog, "diffuseProduct"), flatten(diffuseProduct))
-    gl.uniform4fv(gl.getUniformLocation(
-        prog, "specularProduct"), flatten(specularProduct))
-    gl.uniform1f(gl.getUniformLocation(
-        prog, "shininess"), materialShininess)
-
-    gl.uniform4fv(gl.getUniformLocation(
-        prog, "lightPosition"), flatten(lightPosition))
-
-    #projection = perspective(70.0, 1.0, 1.0, 200.0)
-    projection = perspective(60.0, 1.0, 1.0, 2000.0)
-
-    # send projection matrix to the shader program
-    gl.uniformMatrix4fv(ProjectionLoc, False, flatten(projection))
 
     spaceship = SpaceShip()
     envbox = Skybox(1000.0, Mipmap(gl, envImgPaths))
@@ -106,7 +122,7 @@ document.onkeydown = function (e) {
 document.getElementById("Cloak").onclick = invisible;
 
     """)
-    gl.uniform1f(alphaLoc, alpha)
+    
     # gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
     # gl.enable(gl.BLEND)
     # gl.depthMask(False)
@@ -217,7 +233,7 @@ def handleLoadedTexture(texture):
 
 def render():
     global flattenedmodelview, modelview, normalMatrix, ntextures_loaded,\
-        ntextures_tobeloaded, envbox
+        ntextures_tobeloaded, envbox, ModelviewLoc, NormalMatrixLoc
 
     gl.clearColor(0.79, 0.76, 0.27, 1)
     clear_canvas(gl)
@@ -239,21 +255,23 @@ def render():
     # if texture image has been loaded
     if (ntextures_loaded == len(textureList)
             and envbox.isloaded()):
-
-        gl.uniform1i(gl.getUniformLocation(prog, "selector"), 1)
-        gl.enableVertexAttribArray(CoordsLoc)
-        gl.disableVertexAttribArray(NormalLoc)
-        gl.disableVertexAttribArray(TexCoordLoc)
-        envbox.render()
+        ModelviewLoc = prog_skybox.ModelviewLoc
+        NormalMatrixLoc = prog_skybox.NormalMatrixLoc
+        gl.useProgram(prog_skybox)
+        # gl.uniform1i(gl.getUniformLocation(prog_skybox, "selector"), 1)
+        # gl.enableVertexAttribArray(CoordsLoc)
+        # gl.disableVertexAttribArray(NormalLoc)
+        # gl.disableVertexAttribArray(TexCoordLoc)
+        # envbox.render()
         # gl.enableVertexAttribArray(CoordsLoc)
         #gl.uniform1f(gl.getUniformLocation(prog, "selector"), 1.0)
+        ModelviewLoc = prog.ModelviewLoc
+        NormalMatrixLoc = prog.NormalMatrixLoc
+        gl.useProgram(prog)
+        gl.enableVertexAttribArray(CoordsLoc)
         gl.enableVertexAttribArray(NormalLoc)
         gl.enableVertexAttribArray(TexCoordLoc)
-
-        # gl.enableVertexAttribArray(CoordsLoc)
-        # gl.enableVertexAttribArray(NormalLoc)
-        # gl.enableVertexAttribArray(TexCoordLoc)
-        # spaceship.traverse()
+        spaceship.traverse()
 
     #modelview = initialModelView
 
