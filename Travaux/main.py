@@ -122,19 +122,19 @@ document.onkeydown = function (e) {
             break
         case 'ArrowUp':
             kBoard_displace.translate = mult(
-                kBoard_displace.translate, translate(0,0,5));
+                modelview = mult(translate(0,0,5), modelview))
             break;
         case 'ArrowDown':
             kBoard_displace.translate = mult(
-                kBoard_displace.translate, translate(0,0,-5));
+                modelview = mult(translate(0,0,-5), modelview))
             break;
         case 'ArrowRight':
             kBoard_displace.rotate = mult(
-                kBoard_displace.rotate, rotate(5.0, 0,1,0));
+                modelview = mult( rotate(5.0, 0,1,0), modelview))
             break;
         case 'ArrowLeft':
             kBoard_displace.rotate = mult(
-                kBoard_displace.rotate, rotate(-5.0, 0,1,0));
+                modelview = mult(rotate(-5.0, 0,1,0), modelview))
             break;
     };
 };
@@ -262,10 +262,10 @@ def render():
     # c = Matrice4(3)
     # k = c * g #__: opov
 
-    flattenedmodelview = rotator.getViewMatrix()
-    modelview = unflatten(flattenedmodelview)
-    modelview = mult(kBoard_displace.rotate, modelview)
-    modelview = mult(kBoard_displace.translate, modelview)
+    #flattenedmodelview = rotator.getViewMatrix()
+    #modelview = unflatten(flattenedmodelview)
+    # modelview = mult(kBoard_displace.rotate, modelview)
+    # modelview = mult(kBoard_displace.translate, modelview)
     
 
     

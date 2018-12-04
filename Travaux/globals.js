@@ -25,7 +25,7 @@ var alphaLoc = null;
 //# --- projection matrix
 var projection = null;
 //# modelview matrix
-var modelview = null;
+var modelview = mult(mat4(), translate(0,0,-20));
 //# --- flattened modelview matrix
 var flattenedmodelview = null;
 //# --- create a 3X3 matrix that will affect normals
