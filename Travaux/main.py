@@ -19,8 +19,8 @@ __pragma__('js', '{}', """\n//This is the main function""")
 
 
 def draw():
-    global gl, prog, prog_skybox, mars
-    global trirec, sphere, cylinder, box,  spaceship
+    global gl, prog, prog_skybox, kBoard_displace
+    global trirec, sphere, cylinder, box, spaceship, mars
     global ambientProduct, diffuseProduct, specularProduct
     global CoordsLoc, NormalLoc, TexCoordLoc, ProjectionLoc, ModelviewLoc, \
         NormalMatrixLoc, projection, modelview, flattenedmodelview, \
@@ -49,10 +49,10 @@ def draw():
     prog.NormalMatrixLoc = gl.getUniformLocation(prog, "normalMatrix")
     prog.LigthPositionLoc = gl.getUniformLocation(prog, "lightPosition")
     # skybox vertex shader uniforms
-    prog_skybox.ModelviewLoc = gl.getUniformLocation(prog, "modelview")
-    prog_skybox.ProjectionLoc = gl.getUniformLocation(prog, "projection")
-    prog_skybox.NormalMatrixLoc = gl.getUniformLocation(prog, "normalMatrix")
-    prog_skybox.LigthPositionLoc = gl.getUniformLocation(prog, "lightPosition")
+    prog_skybox.ModelviewLoc = gl.getUniformLocation(prog_skybox, "modelview")
+    prog_skybox.ProjectionLoc = gl.getUniformLocation(prog_skybox, "projection")
+    prog_skybox.NormalMatrixLoc = gl.getUniformLocation(prog_skybox, "normalMatrix")
+    prog_skybox.LigthPositionLoc = gl.getUniformLocation(prog_skybox, "lightPosition")
     
     # locate variables for the Phong+texture fragment shaders
     alphaLoc = gl.getUniformLocation(prog, "alpha")
@@ -112,6 +112,7 @@ def draw():
     textureList.append(Texture2D(gl, "img/textCockpitGlass.jpg"))
 
     # managing arrow keys (to move up or down the model)
+    kBoard_displace = Transform()
     __pragma__('js', '{}', """ 
 document.onkeydown = function (e) {
     switch (e.key) {
@@ -119,6 +120,22 @@ document.onkeydown = function (e) {
             //resize the canvas to the current window width and height
             resize(canvas)
             break
+        case 'ArrowUp':
+            kBoard_displace.translate = mult(
+                kBoard_displace.translate, translate(0,0,5));
+            break;
+        case 'ArrowDown':
+            kBoard_displace.translate = mult(
+                kBoard_displace.translate, translate(0,0,-5));
+            break;
+        case 'ArrowRight':
+            kBoard_displace.rotate = mult(
+                kBoard_displace.rotate, rotate(5.0, 0,1,0));
+            break;
+        case 'ArrowLeft':
+            kBoard_displace.rotate = mult(
+                kBoard_displace.rotate, rotate(-5.0, 0,1,0));
+            break;
     };
 };
 document.getElementById("Cloak").onclick = invisible;
@@ -236,7 +253,7 @@ def handleLoadedTexture(texture):
 
 def render():
     global flattenedmodelview, modelview, normalMatrix, ntextures_loaded,\
-        ntextures_tobeloaded, envbox, ModelviewLoc, NormalMatrixLoc
+        ntextures_tobeloaded, envbox, ModelviewLoc, NormalMatrixLoc, kBoard_displace
 
     gl.clearColor(0.79, 0.76, 0.27, 1)
     clear_canvas(gl)
@@ -247,6 +264,11 @@ def render():
 
     flattenedmodelview = rotator.getViewMatrix()
     modelview = unflatten(flattenedmodelview)
+    modelview = mult(kBoard_displace.rotate, modelview)
+    modelview = mult(kBoard_displace.translate, modelview)
+    
+
+    
     #initialModelView = modelview
     #normalMatrix = extractNormalMatrix(modelview)
     # modelview = mult(modelview, scale(1, 4, .5))
@@ -267,13 +289,11 @@ def render():
         ModelviewLoc = prog_skybox.ModelviewLoc
         NormalMatrixLoc = prog_skybox.NormalMatrixLoc
         gl.useProgram(prog_skybox)
-        # gl.uniform1i(gl.getUniformLocation(prog_skybox, "selector"), 1)
-        # gl.enableVertexAttribArray(CoordsLoc)
-        # gl.disableVertexAttribArray(NormalLoc)
-        # gl.disableVertexAttribArray(TexCoordLoc)
-        # envbox.render()
-        # gl.enableVertexAttribArray(CoordsLoc)
-        #gl.uniform1f(gl.getUniformLocation(prog, "selector"), 1.0)
+        gl.enableVertexAttribArray(CoordsLoc)
+        gl.disableVertexAttribArray(NormalLoc)
+        gl.disableVertexAttribArray(TexCoordLoc)
+        envbox.render()
+
         ModelviewLoc = prog.ModelviewLoc
         NormalMatrixLoc = prog.NormalMatrixLoc
         gl.useProgram(prog)

@@ -106,7 +106,6 @@ class Skybox:
     def render(self):
         set_mipmap(self.mipmap)
         self.skybox.render()
-        set_texture(0)
 
     def isloaded(self):
         return self.mipmap.isloaded

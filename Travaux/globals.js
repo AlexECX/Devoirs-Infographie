@@ -6,6 +6,7 @@ var gl = null;
 var prog = null;
 var prog_skybox = null;
 var invisibility_timeout = null;
+var kBoard_displace = null;
 //Location of the coords attribute variable in the standard texture mappping shader program.
 var CoordsLoc = null;
 var NormalLoc = null;
