@@ -113,7 +113,7 @@ document.getElementById("Cloak").onclick = invisible;
     # gl.enable(gl.BLEND)
     # gl.depthMask(False)
     # setTimeout(invisible, 1500)
-    #setInterval(render, 50)
+    setInterval(render, 50)
     render()
 
 
@@ -238,9 +238,9 @@ def render():
     #spaceship.transform = Transform()
     spaceship.transform.multi = scale(.30, .30, .30)
     mars_scale = mult(scale(.30,.30,.30), scale(100, 100, 100))
-    m = mult(translate(0,0,1000.0), mars.planet_rotate)
-    m = mult(m, mars_scale)
+    m = mult(translate(0,0,1000.0), mars_scale)
     mars.transform.multi = m
+    mars.transform.rotate = mars.planet_rotate
    # mars.transform.multi = mult(mars.transform.multi, mars_scale)
     # spaceship.traverse()
 
@@ -248,21 +248,21 @@ def render():
     if (all([t.isloaded for t in textureList])
         and envbox.isloaded()):
 
-        gl.uniform1i(gl.getUniformLocation(prog, "selector"), 0)
-        gl.enableVertexAttribArray(CoordsLoc)
-        gl.disableVertexAttribArray(NormalLoc)
-        gl.disableVertexAttribArray(TexCoordLoc)
-        envbox.render()
+        # gl.uniform1i(gl.getUniformLocation(prog, "selector"), 0)
+        # gl.enableVertexAttribArray(CoordsLoc)
+        # gl.disableVertexAttribArray(NormalLoc)
+        # gl.disableVertexAttribArray(TexCoordLoc)
+        # envbox.render()
 
        # gl.uniform1i(gl.getUniformLocation(prog, "selector"), 1)
         gl.enableVertexAttribArray(NormalLoc)
         gl.enableVertexAttribArray(TexCoordLoc)
 
-        # gl.enableVertexAttribArray(CoordsLoc)
+        gl.enableVertexAttribArray(CoordsLoc)
         # gl.enableVertexAttribArray(NormalLoc)
         # gl.enableVertexAttribArray(TexCoordLoc)
-        #spaceship.traverse()
-        #mars.traverse()
+        spaceship.traverse()
+        mars.traverse()
 
     #modelview = initialModelView
 
