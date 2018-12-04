@@ -92,6 +92,17 @@
     }
 </script>
 
+<script type="x-shader/x-fragment" id="fshaderbox">
+     precision mediump float;
+
+     varying vec3 fCoords;
+
+     uniform samplerCube skybox;
+
+     void main() {
+          gl_FragColor = textureCube(skybox, fCoords);
+     }
+</script>
 
 
 <script type="text/javascript" src="../Common/webgl-utils.js"></script>
