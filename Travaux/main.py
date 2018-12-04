@@ -4,7 +4,8 @@ from javascript import document, Math   # __: skip
 
 from webgl_utils import webgl_render, clear_canvas, init_webgl_inst, select_shaders
 from shapes import SpaceShip, Transform
-from textures import Mipmap, Skybox
+from textures import Texture2D, Mipmap, Skybox
+from planets import Mars
 
 __pragma__('js', """/*
 The main module: 
@@ -18,7 +19,7 @@ __pragma__('js', '{}', """\n//This is the main function""")
 
 
 def draw():
-    global gl, prog, prog_skybox
+    global gl, prog, prog_skybox, mars
     global trirec, sphere, cylinder, box,  spaceship
     global ambientProduct, diffuseProduct, specularProduct
     global CoordsLoc, NormalLoc, TexCoordLoc, ProjectionLoc, ModelviewLoc, \
@@ -94,20 +95,21 @@ def draw():
     rotator.setView([.3, .2, .5], [0, 1.0, 0], 60)
 
     spaceship = SpaceShip()
-    envbox = Skybox(1000.0, Mipmap(gl, envImgPaths))
+    envbox = Skybox(1999.0, Mipmap(gl, envImgPaths))
+    mars = Mars()
     #box = createModel(empty_cube(10.0, 2.0))
     #box = createModel(cube(10.0))
     __pragma__('js', '{}', """//preparation textures""")
+
     textureList = []
-    textureList.append(initTexture("img/text1.jpg", handleLoadedTexture))
-    textureList.append(initTexture("img/text3.jpg", handleLoadedTexture))
-    textureList.append(initTexture("img/text5.jpg", handleLoadedTexture))
-    textureList.append(initTexture("img/textCanon.jpg", handleLoadedTexture))
-    textureList.append(initTexture("img/textCanon2.jpg", handleLoadedTexture))
-    textureList.append(initTexture("img/textCanon3.jpg", handleLoadedTexture))
-    textureList.append(initTexture("img/textBlanc.jpg", handleLoadedTexture))
-    textureList.append(initTexture(
-        "img/textCockpitGlass.jpg", handleLoadedTexture))
+    textureList.append(Texture2D(gl, "img/text1.jpg"))
+    textureList.append(Texture2D(gl, "img/text3.jpg"))
+    textureList.append(Texture2D(gl, "img/text5.jpg"))
+    textureList.append(Texture2D(gl, "img/textCanon.jpg"))
+    textureList.append(Texture2D(gl, "img/textCanon2.jpg"))
+    textureList.append(Texture2D(gl, "img/textCanon3.jpg"))
+    textureList.append(Texture2D(gl, "img/textBlanc.jpg"))
+    textureList.append(Texture2D(gl, "img/textCockpitGlass.jpg"))
 
     # managing arrow keys (to move up or down the model)
     __pragma__('js', '{}', """ 
@@ -127,6 +129,7 @@ document.getElementById("Cloak").onclick = invisible;
     # gl.enable(gl.BLEND)
     # gl.depthMask(False)
     # setTimeout(invisible, 1500)
+    #setInterval(render, 50)
     render()
 
 
@@ -248,13 +251,19 @@ def render():
     #normalMatrix = extractNormalMatrix(modelview)
     # modelview = mult(modelview, scale(1, 4, .5))
     # box.render()
-    spaceship.transform = Transform()
-    spaceship.transform.multi = scale(.80, .80, .80)
+    #spaceship.transform = Transform()
+    spaceship.transform.multi = scale(.30, .30, .30)
+    mars_scale = mult(scale(.30,.30,.30), scale(100, 100, 100))
+    m = mult(translate(0,0,1000.0), mars.planet_rotate)
+    m = mult(m, mars_scale)
+    mars.transform.multi = m
+   # mars.transform.multi = mult(mars.transform.multi, mars_scale)
     # spaceship.traverse()
 
     # if texture image has been loaded
-    if (ntextures_loaded == len(textureList)
-            and envbox.isloaded()):
+    if (all([t.isloaded for t in textureList])
+        and envbox.isloaded()):
+
         ModelviewLoc = prog_skybox.ModelviewLoc
         NormalMatrixLoc = prog_skybox.NormalMatrixLoc
         gl.useProgram(prog_skybox)
@@ -272,8 +281,11 @@ def render():
         gl.enableVertexAttribArray(NormalLoc)
         gl.enableVertexAttribArray(TexCoordLoc)
         spaceship.traverse()
+        mars.traverse()
 
     #modelview = initialModelView
+
+        
 
 
 __pragma__('js', '{}', """

@@ -1,6 +1,7 @@
-// Transcrypt'ed from Python, 2018-12-04 15:16:17
+// Transcrypt'ed from Python, 2018-12-04 15:35:55
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
-import {Mipmap, Skybox} from './textures.js';
+import {Mars} from './planets.js';
+import {Mipmap, Skybox, Texture2D} from './textures.js';
 import {SpaceShip, Transform} from './shapes.js';
 import {clear_canvas, init_webgl_inst, select_shaders, webgl_render} from './webgl_utils.js';
 var __name__ = '__main__';
@@ -24,10 +25,14 @@ export var draw = function () {
 	CoordsLoc = gl.getAttribLocation (prog, 'vcoords');
 	NormalLoc = gl.getAttribLocation (prog, 'vnormal');
 	TexCoordLoc = gl.getAttribLocation (prog, 'vtexcoord');
-	ModelviewLoc = gl.getUniformLocation (prog, 'modelview');
-	ProjectionLoc = gl.getUniformLocation (prog, 'projection');
-	NormalMatrixLoc = gl.getUniformLocation (prog, 'normalMatrix');
-	LigthPositionLoc = gl.getUniformLocation (prog_skybox, 'lightPosition');
+	prog.ModelviewLoc = gl.getUniformLocation (prog, 'modelview');
+	prog.ProjectionLoc = gl.getUniformLocation (prog, 'projection');
+	prog.NormalMatrixLoc = gl.getUniformLocation (prog, 'normalMatrix');
+	prog.LigthPositionLoc = gl.getUniformLocation (prog, 'lightPosition');
+	prog_skybox.ModelviewLoc = gl.getUniformLocation (prog, 'modelview');
+	prog_skybox.ProjectionLoc = gl.getUniformLocation (prog, 'projection');
+	prog_skybox.NormalMatrixLoc = gl.getUniformLocation (prog, 'normalMatrix');
+	prog_skybox.LigthPositionLoc = gl.getUniformLocation (prog, 'lightPosition');
 	alphaLoc = gl.getUniformLocation (prog, 'alpha');
 	TextureLoc = gl.getUniformLocation (prog, 'texture');
 	SkyBoxLoc = gl.getUniformLocation (prog_skybox, 'skybox');
@@ -39,26 +44,27 @@ export var draw = function () {
 	gl.useProgram (prog);
 	gl.uniform1f (alphaLoc, alpha);
 	gl.uniform1f (gl.getUniformLocation (prog, 'shininess'), materialShininess);
-	gl.uniform4fv (LigthPositionLoc, flatten (lightPosition));
-	gl.uniformMatrix4fv (ProjectionLoc, false, flatten (projection));
+	gl.uniform4fv (prog.LigthPositionLoc, flatten (lightPosition));
+	gl.uniformMatrix4fv (prog.ProjectionLoc, false, flatten (projection));
 	//initialise skybox program
 	gl.useProgram (prog_skybox);
-	gl.uniform4fv (LigthPositionLoc, flatten (lightPosition));
-	gl.uniformMatrix4fv (ProjectionLoc, false, flatten (projection));
+	gl.uniform4fv (prog_skybox.LigthPositionLoc, flatten (lightPosition));
+	gl.uniformMatrix4fv (prog_skybox.ProjectionLoc, false, flatten (projection));
 	rotator = new SimpleRotator (canvas, render);
 	rotator.setView (list ([0.3, 0.2, 0.5]), list ([0, 1.0, 0]), 60);
 	spaceship = SpaceShip ();
-	envbox = Skybox (1000.0, Mipmap (gl, envImgPaths));
+	envbox = Skybox (1999.0, Mipmap (gl, envImgPaths));
+	mars = Mars ();
 	//preparation textures
 	textureList = list ([]);
-	textureList.append (initTexture ('img/text1.jpg', handleLoadedTexture));
-	textureList.append (initTexture ('img/text3.jpg', handleLoadedTexture));
-	textureList.append (initTexture ('img/text5.jpg', handleLoadedTexture));
-	textureList.append (initTexture ('img/textCanon.jpg', handleLoadedTexture));
-	textureList.append (initTexture ('img/textCanon2.jpg', handleLoadedTexture));
-	textureList.append (initTexture ('img/textCanon3.jpg', handleLoadedTexture));
-	textureList.append (initTexture ('img/textBlanc.jpg', handleLoadedTexture));
-	textureList.append (initTexture ('img/textCockpitGlass.jpg', handleLoadedTexture));
+	textureList.append (Texture2D (gl, 'img/text1.jpg'));
+	textureList.append (Texture2D (gl, 'img/text3.jpg'));
+	textureList.append (Texture2D (gl, 'img/text5.jpg'));
+	textureList.append (Texture2D (gl, 'img/textCanon.jpg'));
+	textureList.append (Texture2D (gl, 'img/textCanon2.jpg'));
+	textureList.append (Texture2D (gl, 'img/textCanon3.jpg'));
+	textureList.append (Texture2D (gl, 'img/textBlanc.jpg'));
+	textureList.append (Texture2D (gl, 'img/textCockpitGlass.jpg'));
 	 
 	document.onkeydown = function (e) {
 	    switch (e.key) {
@@ -183,15 +189,29 @@ export var render = function () {
 	clear_canvas (gl);
 	flattenedmodelview = rotator.getViewMatrix ();
 	modelview = unflatten (flattenedmodelview);
-	spaceship.transform = Transform ();
-	spaceship.transform.multi = scale (0.8, 0.8, 0.8);
-	if (ntextures_loaded == len (textureList) && envbox.isloaded ()) {
+	spaceship.transform.multi = scale (0.3, 0.3, 0.3);
+	var mars_scale = mult (scale (0.3, 0.3, 0.3), scale (100, 100, 100));
+	var m = mult (translate (0, 0, 1000.0), mars.planet_rotate);
+	var m = mult (m, mars_scale);
+	mars.transform.multi = m;
+	if (all ((function () {
+		var __accu0__ = [];
+		for (var t of textureList) {
+			__accu0__.append (t.isloaded);
+		}
+		return __accu0__;
+	}) ()) && envbox.isloaded ()) {
+		ModelviewLoc = prog_skybox.ModelviewLoc;
+		NormalMatrixLoc = prog_skybox.NormalMatrixLoc;
 		gl.useProgram (prog_skybox);
+		ModelviewLoc = prog.ModelviewLoc;
+		NormalMatrixLoc = prog.NormalMatrixLoc;
 		gl.useProgram (prog);
+		gl.enableVertexAttribArray (CoordsLoc);
 		gl.enableVertexAttribArray (NormalLoc);
 		gl.enableVertexAttribArray (TexCoordLoc);
-		gl.enableVertexAttribArray (CoordsLoc);
 		spaceship.traverse ();
+		mars.traverse ();
 	}
 };
 

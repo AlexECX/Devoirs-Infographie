@@ -36,6 +36,7 @@ var sphere = null;
 var cylinder = null;
 var box = null;
 var spaceship = null;
+var mars = null;
 //Phong model elements
 var lightPosition = vec4 (20.0, 20.0, 100.0, 1.0);
 var lightAmbient = vec4 (1.0, 1.0, 1.0, 1.0);
