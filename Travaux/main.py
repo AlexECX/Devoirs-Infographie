@@ -65,7 +65,7 @@ def draw():
     specularProduct = mult(lightSpecular, materialSpecular)
 
     #projection = perspective(70.0, 1.0, 1.0, 200.0)
-    projection = perspective(60.0, 1.0, 1.0, 2000.0)
+    projection = perspective(60.0, 1.0, 1.0, 3000.0)
 
     # gl.uniform4fv(gl.getUniformLocation(
     #     prog, "ambientProduct"), flatten(ambientProduct))
@@ -113,28 +113,93 @@ def draw():
 
     # managing arrow keys (to move up or down the model)
     kBoard_displace = Transform()
+    kBoard_displace.advancing = True
+    # if k.advancing:
+    #     k.translate = mult(translate(0,0,5), k.translate)
+    # else:
+    #     multi = mult(k.multi, mult(k.rotate, k.translate))
+    #     k = Transform(translate=translate(0,0,5))
+    #     k.multi = multi
+    #     k.advancing = True
+
+    # if k.advancing:
+    #     k.translate = mult(translate(0,0,-5), k.translate)
+    # else:
+    #     multi = mult(k.multi, mult(k.rotate, k.translate))
+    #     k = Transform(translate=translate(0,0,-5))
+    #     k.multi = multi
+    #     k.advancing = True
+
+    # if not k.advancing:
+    #     k.translate = mult(rotate(5.0, 0,1,0), k.rotate)
+    # else:
+    #     multi = mult(k.multi, mult(k.rotate, k.translate))
+    #     k = Transform(rotate=rotate(5.0, 0,1,0))
+    #     k.multi = multi
+    #     k.advancing = False
+
+    # if not k.advancing:
+    #     k.translate = mult(rotate(5.0, 0,1,0), k.rotate)
+    # else:
+    #     multi = mult(k.multi, mult(k.rotate, k.translate))
+    #     k = Transform(rotate=rotate(5.0, 0,1,0))
+    #     k.multi = multi
+    #     k.advancing = False
     __pragma__('js', '{}', """ 
 document.onkeydown = function (e) {
+    var k = kBoard_displace
     switch (e.key) {
         case 'Home':
             //resize the canvas to the current window width and height
             resize(canvas)
             break
         case 'ArrowUp':
-            kBoard_displace.translate = mult(
-                modelview = mult(translate(0,0,5), modelview))
+            if (k.advancing == true) {
+                k.translate = mult (translate (0, 0, 5), k.translate);
+            }
+            else {
+                k.multi = mult (mult (k.rotate, k.translate), k.multi);
+                sky_rotate = mult(k.rotate, sky_rotate);
+                k.tranlate = translate (0, 0, 5);
+                k.rotate = mat4();
+                k.advancing = true;
+            }
             break;
         case 'ArrowDown':
-            kBoard_displace.translate = mult(
-                modelview = mult(translate(0,0,-5), modelview))
+            if (k.advancing == true) {
+                k.translate = mult (translate (0, 0, -(5)), k.translate);
+            }
+            else {
+                k.multi = mult (mult (k.rotate, k.translate), k.multi);
+                sky_rotate = mult(k.rotate, sky_rotate);
+                k.tranlate = translate (0, 0, -5);
+                k.rotate = mat4();
+                k.advancing = true;
+            }            
             break;
         case 'ArrowRight':
-            kBoard_displace.rotate = mult(
-                modelview = mult( rotate(5.0, 0,1,0), modelview))
+            if (!(k.advancing == true)) {
+                k.rotate = mult (rotate (2.0, 0, 1, 0), k.rotate);
+            }
+            else {
+                k.multi = mult (mult (k.rotate, k.translate), k.multi);
+                sky_rotate = mult(k.rotate, sky_rotate);
+                k.rotate = rotate (2.0, 0, 1, 0);
+                k.translate = mat4();
+                k.advancing = false;
+            }
             break;
         case 'ArrowLeft':
-            kBoard_displace.rotate = mult(
-                modelview = mult(rotate(-5.0, 0,1,0), modelview))
+            if (!(k.advancing == true)) {
+                k.rotate = mult (rotate (-2.0, 0, 1, 0), k.rotate);
+            }
+            else {
+                k.multi = mult (mult (k.rotate, k.translate), k.multi);
+                sky_rotate = mult(k.rotate, sky_rotate);
+                k.rotate = rotate (-2.0, 0, 1, 0);
+                k.translate = mat4();
+                k.advancing = false;
+            }            
             break;
     };
 };
@@ -253,7 +318,8 @@ def handleLoadedTexture(texture):
 
 def render():
     global flattenedmodelview, modelview, normalMatrix, ntextures_loaded,\
-        ntextures_tobeloaded, envbox, ModelviewLoc, NormalMatrixLoc, kBoard_displace
+        ntextures_tobeloaded, envbox, ModelviewLoc, NormalMatrixLoc, kBoard_displace,\
+        sky_rotate
 
     gl.clearColor(0.79, 0.76, 0.27, 1)
     clear_canvas(gl)
@@ -275,10 +341,10 @@ def render():
     # box.render()
     #spaceship.transform = Transform()
     spaceship.transform.multi = scale(.30, .30, .30)
-    mars_scale = mult(scale(.30,.30,.30), scale(100, 100, 100))
+    mars_scale = scale(30, 30, 30)
     m = mult(translate(0,0,1000.0), mars_scale)
     mars.transform.multi = m
-    mars.transform.rotate = mars.planet_rotate
+    # mars.transform.rotate = mars.planet_rotate
    # mars.transform.multi = mult(mars.transform.multi, mars_scale)
     # spaceship.traverse()
 
@@ -286,6 +352,9 @@ def render():
     if (all([t.isloaded for t in textureList])
         and envbox.isloaded()):
 
+        initialModelView = modelview
+        m = mult(kBoard_displace.rotate, sky_rotate)
+        modelview = mult(m, modelview)
         ModelviewLoc = prog_skybox.ModelviewLoc
         NormalMatrixLoc = prog_skybox.NormalMatrixLoc
         gl.useProgram(prog_skybox)
@@ -294,6 +363,10 @@ def render():
         gl.disableVertexAttribArray(TexCoordLoc)
         envbox.render()
 
+        modelview = initialModelView
+        m = mult(kBoard_displace.rotate, kBoard_displace.translate)
+        m = mult(m, kBoard_displace.multi)
+        modelview = mult(m, modelview)
         ModelviewLoc = prog.ModelviewLoc
         NormalMatrixLoc = prog.NormalMatrixLoc
         gl.useProgram(prog)
@@ -303,7 +376,7 @@ def render():
         spaceship.traverse()
         mars.traverse()
 
-    #modelview = initialModelView
+        modelview = initialModelView
 
         
 

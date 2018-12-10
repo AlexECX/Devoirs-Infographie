@@ -7,6 +7,7 @@ var prog = null;
 var prog_skybox = null;
 var invisibility_timeout = null;
 var kBoard_displace = null;
+var sky_rotate = mat4();
 //Location of the coords attribute variable in the standard texture mappping shader program.
 var CoordsLoc = null;
 var NormalLoc = null;
@@ -53,8 +54,6 @@ var specularProduct = null;
 var alpha = 1.0;
 //color codes (rgb)
 //var BaseColors = list ([vec4 (0.0, 0.0, 0.0, 1.0), vec4 (1.0, 0.0, 0.0, 1.0), vec4 (1.0, 1.0, 0.0, 1.0), vec4 (0.0, 1.0, 0.0, 1.0), vec4 (0.0, 0.0, 1.0, 1.0), vec4 (1.0, 0.0, 1.0, 1.0), vec4 (0.0, 1.0, 1.0, 1.0), vec4 (1.0, 1.0, 1.0, 1.0)]);
-var ntextures_loaded = 0;
-var ntextures_map_loaded = 0;
 var textureList;
 var envbox;
 var envImgPaths = [
