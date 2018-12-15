@@ -34,6 +34,7 @@ class Texture2D:
         self.gl = gl
         self.isloaded = False
         self.img = None
+        self.loadedTextures = 0
         self.texture = gl.createTexture()
         
         self.img = __new__(Image())
@@ -51,17 +52,18 @@ class Texture2D:
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
         
         self.isloaded = True
+        self.loadedTextures += 1
 
         render()  # Call render function when the image has been loaded (to make sure the model is displayed)
 
         gl.bindTexture(gl.TEXTURE_2D, None)
 
 __pragma__('js', '{}', """/**
-* Encapsule une WebGL TEXTURE_CUBE_MAP. Génère la 
+* Encapsule une WebGL Mipmap (gl.TEXTURE_CUBE_MAP seulement). Génère la 
 * cube_map à partir d'une liste de 6 chemin vers des images et l'associe 
-* à un handler qui traite les textures lorsqu'elles sont tous chargées.
+* à un handler qui traite la texture d'est quelle est chargé.
 */""")
-class TextureCubeMap:
+class Mipmap:
 
     def __init__(self, gl, paths):
         self.gl = gl
@@ -77,10 +79,8 @@ class TextureCubeMap:
                 'js', '{}', """function () { self.handleLoadedTextureMap(self.texture) }""")
             img.src = path
             self.imgs.append(img)
-            
 
     def handleLoadedTextureMap(self, texture):
-        
         self.loadedTextures += 1
         gl = self.gl
         if self.loadedTextures == self.map_size:
@@ -110,11 +110,11 @@ class TextureCubeMap:
 __pragma__('js', '{}', """/**
 * Encapsulation d'une skybox. 
 * @size la taille de la skybox
-* @cubemap la texture utilisé par la skybox
+* @mipmap la texture utilisé par la skybox
 */""")
 class Skybox:
     
-    def __init__(self, size, cubemap):
+    def __init__(self, size, mipmap):
         self.skybox = createModelbox(cube(size))
         self.mipmap = mipmap
 

@@ -4,7 +4,7 @@ from javascript import document, Math   # __: skip
 
 from webgl_utils import clear_canvas, init_webgl_inst, WebGLProgram
 from shapes import SpaceShip, Transform
-from textures import Texture2D, TextureCubeMap, Skybox, set_texture_old
+from textures import Texture2D, Mipmap, Skybox, set_texture_old
 from planets import Earth, Mars, Venus, Rotation
 
 __pragma__('js', """/*
@@ -110,7 +110,7 @@ def draw():
     # rotator.setView([.3, .2, .5], [0, 1.0, 0], 60)
 
     spaceship = SpaceShip()
-    skybox = Skybox(2999.0, TextureCubeMap(gl, envImgPaths))
+    skybox = Skybox(2999.0, Mipmap(gl, envImgPaths))
     earth = Earth()
     mars = Mars()
     venus = Venus()
