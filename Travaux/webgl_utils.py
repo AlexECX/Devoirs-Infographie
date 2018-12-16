@@ -1,6 +1,7 @@
-from org.transcrypt import __pragma__  # __: skip
-from javascript import document, alert   # __: skip
-from WebGL import initShaders, WebGLUtils, requestAnimFrame  # __: skip
+from WebGL import WebGLUtils, initShaders, requestAnimFrame #__: skip
+from javascript import alert, document #__: skip
+from org.transcrypt import __pragma__ #__: skip
+from js_compat import js_typeof
 
 
 __pragma__('js', '//Base render function')
@@ -47,34 +48,9 @@ def select_shaders(gl, *args):
 
 
 __pragma__('js', '{}', """/**
-* Recursively converts an iterable implementing __iter__, and all __iter__
-* objects it contains, into bare array objects
+* Encapsulation d'un WebGLProgram. 
 */""")
-
-def js_list(iterable):
-    if hasattr(iterable, "__iter__"):
-        return [js_list(i) for i in iterable]  # __:opov
-    else:
-        return iterable
-
-__pragma__('js', '{}', """/**
-* typeof compatibility for Transcrypt 
-*/""")
-def js_typeof(value):
-    __pragma__('js', '{}', """return typeof value""")
-
-__pragma__('js', """
-/**
-* objet creation compatibility for Transcrypt.
-*/""")
-def js_obj():
-    __pragma__('js', 'return {{}}')
-
-__pragma__('js', '{}', """/**
-* Encapsulation d'un programme WebGL. 
-*  
-*/""")
-class WebGLProgram:
+class Program:
 
     def __init__(self, gl, vshader, fshader):
         self.gl = gl
@@ -112,9 +88,9 @@ class WebGLProgram:
     * Permet d'obtenir la localisation d'une variable du programme
     */""")
     def loc(self, var_name):
-        value = self.location_dict[var_name]
-        if js_typeof(value) == "undefined":
-            raise KeyError(var_name)
+        value = self.location_dict.get(var_name)
+        if value == None:
+            raise KeyError("'"+var_name+"'",  __new__(Error()))
         else:
             return value
 
@@ -123,3 +99,5 @@ class WebGLProgram:
     */""")
     def useProgram(self):
         self.gl.useProgram(self.prog)
+
+    

@@ -2,12 +2,6 @@ from org.transcrypt import __pragma__  # __: skip
 from MV import mat4, vec4, vec3, ortho, flatten, radians, rotate, scale, translate, mult  # __: skip
 from daudet import createModel, extractNormalMatrix  # __: skip
 from textures import set_texture_old
-__pragma__('js', """
-/**
-* Shortcut pour créer un objet ({{}} représente un dictionnaire en python).
-*/""")
-def js_obj():
-    __pragma__('js', 'return {{}}')
 
 __pragma__('js', '{}', """/**
 * Shortcut to set Ambiant, Diffuse and Specular properties. 

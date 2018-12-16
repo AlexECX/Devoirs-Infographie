@@ -2,7 +2,8 @@ from org.transcrypt import __pragma__, __new__  # __: skip
 from MV import mat4, vec4, vec3, ortho, flatten, radians, rotate, scale, translate, mult  # __: skip
 from javascript import document, Math   # __: skip
 
-from webgl_utils import clear_canvas, init_webgl_inst, WebGLProgram
+from webgl_utils import clear_canvas, init_webgl_inst, Program
+from js_compat import js_list, handle_PythonError
 from shapes import SpaceShip, Transform
 from textures import Texture2D, TextureCubeMap, Skybox, set_texture_old
 from planets import Earth, Mars, Venus, Rotation
@@ -16,8 +17,7 @@ The main module:
 
 
 __pragma__('js', '{}', """\n//This is the main function""")
-
-
+@handle_PythonError        
 def draw():
     global gl, prog, prog_skybox, prog_reflet, kBoard_displace
     global trirec, sphere, cylinder, box, spaceship, earth, mars, venus, signature
@@ -28,7 +28,6 @@ def draw():
     global textureList, envTexture, skybox, globalRotator
 
     __pragma__('js', '//init')
-
     gl = init_webgl_inst()
     canvas = document.getElementById("gl-canvas")
     # clear_canvas(gl)
@@ -37,11 +36,11 @@ def draw():
     __pragma__('js', '//LOAD SHADER (standard texture mapping)')
     vertexShaderSource = getTextContent("vshader")
     fragmentShaderSource = getTextContent("fshader")
-    prog = WebGLProgram(gl, vertexShaderSource, fragmentShaderSource)
-    prog_skybox = WebGLProgram(gl, getTextContent("vshaderbox"), getTextContent("fshaderbox"))
-    prog_reflet = WebGLProgram(gl, getTextContent("vshadermap"), getTextContent("fshadermap"))
+    prog = Program(gl, vertexShaderSource, fragmentShaderSource)
+    prog_skybox = Program(gl, getTextContent("vshaderbox"), getTextContent("fshaderbox"))
+    prog_reflet = Program(gl, getTextContent("vshadermap"), getTextContent("fshadermap"))
     #prog_reflet.useProgram()
-    prog.locate(gl.getAttribLocation, "vcoords")
+    prog.locate(gl.getAttribLocation, "vcoords") #should be vcoords
     prog.locate(gl.getAttribLocation, "vnormal")
     prog.locate(gl.getAttribLocation, "vtexcoord")
     prog.locate(gl.getUniformLocation, "modelview")
@@ -300,7 +299,7 @@ def invisible():
 
 #     gl.bindTexture(gl.TEXTURE_2D, None)
 
-
+@handle_PythonError
 def render():
     global flattenedmodelview, modelview, normalMatrix, ntextures_loaded,\
         ntextures_tobeloaded, skybox, ModelviewLoc, NormalMatrixLoc, kBoard_displace,\
@@ -353,7 +352,7 @@ def render():
         gl.enableVertexAttribArray(prog_reflet.loc("vnormal"))
 
         gl.activeTexture(gl.TEXTURE0)
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP, skybox.mipmap.texture)
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, skybox.cubemap.texture)
         # Send texture to sampler
         gl.uniform1i(prog_reflet.loc("skybox"), 0)
 
